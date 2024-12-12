@@ -1,13 +1,13 @@
 import 'package:pocketbase/pocketbase.dart';
 
-void main() async {
-  final pb = PocketBase('https://zmartrest-pb.cloud.spetsen.net/');
+final pb = PocketBase('https://zmartrest-pb.cloud.spetsen.net/');
 
+authenticateUser(String email, String password) async {
   // Authenticate the user
   try {
     final authData = await pb.collection('users').authWithPassword(
-      'alwin.forslund@hitachigymnasiet.se',
-      'Jagälskarspetsen',
+      email,
+      password,
     );
     final userData = authData.record;
     final userMap = userData.data;
@@ -25,6 +25,8 @@ void main() async {
 
     // Fetch all data from a specific time range
     await fetchAllDataFromTo(pb, userMap['id'], 0, 1833047000);
+
+    return true;
   } catch (e) {
     print('Error during authentication: $e');
   }
@@ -160,8 +162,8 @@ Future<Map<String, List<dynamic>>> fetchAllDataFromTo(
       }
     });
 
-    return allData;
     print(allData);
+    return allData;
   } catch (e) {
     print('Error fetching data: $e');
     return {}; // Return empty map in case of error

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:zmartrest/main_scaffold.dart';
-import '../auth.dart';
+import 'package:zmartrest/my_pocketbase_app.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   String? _emailError;
   String? _passwordError;
@@ -45,7 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final success = await _authService.login(email, password);
+    //final success = await aut;
+    final success = await authenticateUser(email, password);
 
     if (success) {
       Navigator.of(context).pushReplacement(
