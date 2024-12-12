@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../auth.dart'; // Ensure this import is correct
-import './home_screen.dart'; // You'll need to create this file
+import 'package:zmartrest/main_scaffold.dart';
+import '../auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,14 +15,30 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
+  String? _emailError;
+  String? _passwordError;
+
+  void _validateFields() {
+    setState(() {
+      _emailError = _emailController.text.trim().isEmpty
+          ? 'Email is required'
+          : null;
+
+      _passwordError = _passwordController.text.trim().isEmpty
+          ? 'Password is required'
+          : null;
+    });
+  }
+
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter both email and password'),
+      ShadToaster.of(context).show(
+        const ShadToast(
+          title: Text('Input Error', style: TextStyle(color: Color(0xFFFFFFFF))),
+          description: Text('Please enter both email and password', style: TextStyle(color: Color(0xFFFFFFFF))),
           backgroundColor: Colors.red,
         ),
       );
@@ -34,13 +50,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
+          builder: (context) => const MainScaffold(),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login failed. Please check your credentials.'),
+      ShadToaster.of(context).show(
+        const ShadToast(
+          title: Text('Login Failed', style: TextStyle(color: Color(0xFFFFFFFF))),
+          description: Text('Invalid credentials, please try again.', style: TextStyle(color: Color(0xFFFFFFFF))),
           backgroundColor: Colors.red,
         ),
       );
@@ -49,20 +66,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ShadToaster(
-        child: Padding(
+    return ShadToaster(
+      child: Scaffold(
+        body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               EmailInput(controller: _emailController),
+              if (_emailError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _emailError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               const SizedBox(height: 16),
               PasswordInput(controller: _passwordController),
+              if (_passwordError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _passwordError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               const SizedBox(height: 24),
               ShadButton(
-                child: const Text('Login'),
                 onPressed: _handleLogin,
+                child: const Text('Login')
               ),
             ],
           ),
@@ -71,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
 
 class EmailInput extends StatefulWidget {
   final TextEditingController controller;
