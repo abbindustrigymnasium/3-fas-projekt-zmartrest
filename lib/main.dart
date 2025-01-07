@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import './screens/login_screen.dart';
+import 'package:zmartrest/main_scaffold.dart';
+import 'package:zmartrest/my_pocketbase_app.dart';
 
 void main() {
+  authenticateUser('alwin.forslund@hitachigymnasiet.se', 'Jagälskarspetsen');
   runApp(const MyApp());
 }
 
@@ -22,7 +25,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark, 
         textTheme: ShadTextTheme(family: 'RedHatDisplay')
       ),
-      home: const LoginScreen(),
+      home: const MainScaffold(),
     );
   }
 }

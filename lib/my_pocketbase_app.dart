@@ -1,3 +1,6 @@
+//Needed things from outside = timestampFrom and timestampTo
+//Functions needs list<map<string, dynamic>>> and returns the same
+
 import 'package:pocketbase/pocketbase.dart';
 
 final pb = PocketBase('https://zmartrest-pb.cloud.spetsen.net/');
@@ -16,60 +19,27 @@ authenticateUser(String email, String password) async {
     print('ID: ${userMap['id']}');
     print('Email: ${userMap['email']}');
 
-    // Add accelerometer data
-    //await addAccelerometerData(pb, userMap['id'], 1633046400, 0.45, -0.23, 9.81); // Example 1
-    //await addAccelerometerData(pb, userMap['id'], 1633046500, 0.50, -0.30, 9.82); // Example 2
+    // Example accelerometer and heart rate lists
+    List examplelistOrg = [-2, 5, -10];
+    List examplelist_heart = [75, 5, 800];
 
-    // Fetch accelerometer data for the user
-    //await fetchAccelerometerData(pb, userMap['id']);
+    // Add example data
+    await addAccelerometerData(pb, userMap['id'], 1734013485, examplelistOrg);
+    await addHeartrateData(pb, userMap['id'], 1734013485, examplelist_heart);
 
-    // Fetch all data from a specific time range
-    await fetchAllDataFromTo(pb, userMap['id'], 0, 1833047000);
+    // Fetch data with timestamp range
+    int timestampFrom = 1734013000;
+    int timestampTo = 1734014000;
+
+    await fetchAccelerometerData(pb, userMap['id'], timestampFrom, timestampTo);
+    await fetchHeartrateData(pb, userMap['id'], timestampFrom, timestampTo);
+
+    // Fetch all data within the range
+    await fetchAllDataFromTo(pb, userMap['id'], timestampFrom, timestampTo);
 
     return true;
   } catch (e) {
     print('Error during authentication: $e');
-  }
-}
-
-// Data model for AccelerometerData
-class AccelerometerData {
-  final String id;
-  final String user;
-  final int timestamp;
-  final double x;
-  final double y;
-  final double z;
-
-  AccelerometerData({
-    required this.id,
-    required this.user,
-    required this.timestamp,
-    required this.x,
-    required this.y,
-    required this.z,
-  });
-
-  factory AccelerometerData.fromRecord(dynamic record) {
-    return AccelerometerData(
-      id: record.id,
-      user: record.data['user'],
-      timestamp: record.data['timestamp'],
-      x: record.data['x'],
-      y: record.data['y'],
-      z: record.data['z'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user': user,
-      'timestamp': timestamp,
-      'x': x,
-      'y': y,
-      'z': z,
-    };
   }
 }
 
@@ -86,10 +56,11 @@ Future<void> addAccelerometerData(
       'x': accelerometerList[0],
       'y': accelerometerList[1],
       'z': accelerometerList[2],
-      'user': userId, 
+      'user': userId,
     };
 
-    final result = await pb.collection('accelerometer_data').create(body: accelerometerData);
+    final result =
+        await pb.collection('accelerometer_data').create(body: accelerometerData);
     print('Accelerometer data added:');
     print(result.toJson());
   } catch (e) {
@@ -97,75 +68,114 @@ Future<void> addAccelerometerData(
   }
 }
 
-// Fetch accelerometer data for a specific user
-Future<void> fetchAccelerometerData(PocketBase pb, String userId) async {
+// Add heart rate data to PocketBase
+Future<void> addHeartrateData(
+  PocketBase pb,
+  String userId,
+  int timestamp,
+  List heartrateList,
+) async {
+  try {
+    final heartrateData = {
+      'timestamp': timestamp,
+      'hr': heartrateList[0],
+      'hrv': heartrateList[1],
+      'r_r': heartrateList[2],
+      'user': userId
+    };
+
+    final result =
+        await pb.collection('heart_rate_data').create(body: heartrateData);
+    print('Heart rate data added:');
+    print(result.toJson());
+  } catch (e) {
+    print('Error adding heart rate data: $e');
+  }
+}
+
+// Fetch accelerometer data for a specific user within a timestamp range
+Future<List<Map<String, dynamic>>> fetchAccelerometerData(
+    PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
   try {
     final result = await pb.collection('accelerometer_data').getList(
       page: 1,
       perPage: 10,
-      filter: 'user = "$userId"', // Filter by user ID
+      filter:
+          'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
     );
 
-    print('Fetched accelerometer data for user:');
-    for (var record in result.items) {
-      print('Timestamp: ${record.data['timestamp']}, X: ${record.data['x']}, Y: ${record.data['y']}, Z: ${record.data['z']}');
+    List<Map<String, dynamic>> dataList = result.items.map((record) {
+      return {
+        'timestamp': record.data['timestamp'],
+        'x': record.data['x'],
+        'y': record.data['y'],
+        'z': record.data['z'],
+        'user': record.data['user'],
+      };
+    }).toList();
+
+    print('Fetched accelerometer data within range:');
+    for (var data in dataList) {
+      print(data);
     }
+
+    return dataList;
   } catch (e) {
     print('Failed to fetch accelerometer data: $e');
+    return [];
   }
 }
 
-// Enhanced function to fetch data from multiple collections
-Future<Map<String, List<dynamic>>> fetchAllDataFromTo(
+// Fetch heart rate data for a specific user within a timestamp range
+Future<List<Map<String, dynamic>>> fetchHeartrateData(
     PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
   try {
-    print("Fetching all data from $timestampFrom to $timestampTo");
+    final result = await pb.collection('heart_rate_data').getList(
+      page: 1,
+      perPage: 10,
+      filter:
+          'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
+    );
 
-    // Create a map to store results from different collections
-    Map<String, List<dynamic>> allData = {};
+    List<Map<String, dynamic>> dataList = result.items.map((record) {
+      return {
+        'timestamp': record.data['timestamp'],
+        'hr': record.data['hr'],
+        'hrv': record.data['hrv'],
+        'r_r': record.data['r_r'],
+        'user': record.data['user'],
+      };
+    }).toList();
 
-    // List of collections you want to fetch from
-    List<String> collections = [
-      "accelerometer_data",
-      // Add other collection names here if needed
-    ];
-
-    // Fetch data for each collection
-    for (var collectionName in collections) {
-      var result = await pb.collection(collectionName).getList(
-        filter: 'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
-        page: 1,
-        perPage: 100, // Adjust as needed
-      );
-
-      // Map records to specific data models
-      List<dynamic> mappedItems = result.items.map((item) {
-        if (collectionName == 'accelerometer_data') {
-          return AccelerometerData.fromRecord(item);
-        }
-        // Add more mappings for other collections
-        return item;
-      }).toList();
-
-      allData[collectionName] = mappedItems;
+    print('Fetched heart rate data within range:');
+    for (var data in dataList) {
+      print(data);
     }
 
-    // Print total records fetched from each collection
-    allData.forEach((collection, items) {
-      print('Fetched ${items.length} items from $collection');
-      
-      // Detailed printing for accelerometer data
-      if (collection == 'accelerometer_data') {
-        for (var data in items) {
-          print('Timestamp: ${data.timestamp}, X: ${data.x}, Y: ${data.y}, Z: ${data.z}');
-        }
-      }
-    });
-
-    print(allData);
-    return allData;
+    return dataList;
   } catch (e) {
-    print('Error fetching data: $e');
-    return {}; // Return empty map in case of error
+    print('Failed to fetch heart rate data: $e');
+    return [];
+  }
+}
+
+// Fetch all data (accelerometer + heart rate) within a timestamp range
+Future<void> fetchAllDataFromTo(
+    PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
+  print('Fetching all data within range...');
+  final accelerometerData =
+      await fetchAccelerometerData(pb, userId, timestampFrom, timestampTo);
+  final heartrateData =
+      await fetchHeartrateData(pb, userId, timestampFrom, timestampTo);
+
+  print('Combined data within range:');
+  print('Accelerometer Data:');
+  for (var data in accelerometerData) {
+    print(data);
+  }
+
+  print('Heart Rate Data:');
+  for (var data in heartrateData) {
+    print(data);
   }
 }
