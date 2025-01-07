@@ -7,6 +7,7 @@ import 'package:zmartrest/main_scaffold.dart';
 import 'pocketbase.dart'; 
 
 void main() {
+  authenticateUser('alwin.forslund@hitachigymnasiet.se', 'Jagälskarspetsen');
   runApp(const MyApp());
   // Temporary bypass login
   authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
