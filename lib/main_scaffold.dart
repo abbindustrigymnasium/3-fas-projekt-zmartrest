@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zmartrest/screens/account_screen.dart';
 import 'package:zmartrest/screens/measure_screen.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
-import 'package:zmartrest/widgets/custom_bottom_nav.dart';
+import 'package:zmartrest/widgets/bottom_nav.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -36,34 +36,4 @@ class _MainScaffoldState extends State<MainScaffold> {
       ),
     );
   }
-
-  /*
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Account',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Inspect',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Measure',
-          ),
-        ],
-      ),
-    );
-  }
-  */
 }

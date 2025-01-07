@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  polar: ^7.5.1
+  uuid: ^4.4.2
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import './screens/login_screen.dart';
+//import './screens/login_screen.dart';
+import 'package:zmartrest/main_scaffold.dart';
+
+// Temporary bypass login
+import 'pocketbase.dart'; 
 
 void main() {
   runApp(const MyApp());
+  // Temporary bypass login
+  authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +28,9 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark, 
         textTheme: ShadTextTheme(family: 'RedHatDisplay')
       ),
-      home: const LoginScreen(),
+      // Temporary bypass login
+      //home: const LoginScreen(),
+      home: const MainScaffold(),
     );
   }
 }

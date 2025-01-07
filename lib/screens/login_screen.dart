@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:zmartrest/main_scaffold.dart';
-import 'package:zmartrest/my_pocketbase_app.dart';
+import 'package:zmartrest/pocketbase.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,7 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    //final success = await aut;
     final success = await authenticateUser(email, password);
 
     if (success) {

@@ -169,3 +169,26 @@ Future<Map<String, List<dynamic>>> fetchAllDataFromTo(
     return {}; // Return empty map in case of error
   }
 }
+
+Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {
+  try {
+    final result = await pb.collection('users').getList(
+      page: 1,
+      perPage: 100,
+    );
+
+    List<Map<String, dynamic>> users = result.items.map((record) {
+      return {
+        'id': record.id,
+        'name': record.data['username'] ?? '',
+        'email': record.data['email'] ?? '',
+      };
+    }).toList();
+
+    print('Fetched ${users.length} users');
+    return users;
+  } catch (e) {
+    print('Error fetching users: $e');
+    return []; // Return empty list in case of error
+  }
+}

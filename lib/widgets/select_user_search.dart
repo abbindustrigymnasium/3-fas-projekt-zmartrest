@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class UserSelectWithSearch extends StatefulWidget {
+class SelectUserWithSearch extends StatefulWidget {
   final List<Map<String, dynamic>> users;
   final Function(Map<String, dynamic>) onUserSelected;
 
-  const UserSelectWithSearch({
+  const SelectUserWithSearch({
     super.key, 
     required this.users, 
     required this.onUserSelected
   });
 
   @override
-  State<UserSelectWithSearch> createState() => _UserSelectWithSearchState();
+  State<SelectUserWithSearch> createState() => _SelectUserWithSearchState();
 }
 
-class _UserSelectWithSearchState extends State<UserSelectWithSearch> {
+class _SelectUserWithSearchState extends State<SelectUserWithSearch> {
   var searchValue = '';
 
   Map<String, Map<String, dynamic>> get filteredUsers => {
     for (final user in widget.users)
-      if (user['name'].toLowerCase().contains(searchValue.toLowerCase()) ||
-          user['email'].toLowerCase().contains(searchValue.toLowerCase()))
+      if (user['name'].toLowerCase().contains(searchValue.toLowerCase()) || user['email'].toLowerCase().contains(searchValue.toLowerCase()))
         user['id'].toString(): user
   };
 
@@ -30,7 +29,7 @@ class _UserSelectWithSearchState extends State<UserSelectWithSearch> {
     return ShadSelect<String>.withSearch(
       minWidth: 180,
       maxWidth: 300,
-      placeholder: const Text('Select user to inspect...'),
+      placeholder: const Text('Select'),
       onSearchChanged: (value) => setState(() => searchValue = value),
       searchPlaceholder: const Text('Search by name or email'),
       options: [
