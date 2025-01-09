@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       ),
       // Temporary bypass login
       //home: const LoginScreen(),
+      themeMode: ThemeMode.light,
       home: const MainScaffold(),
     );
   }

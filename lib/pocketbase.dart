@@ -20,12 +20,12 @@ authenticateUser(String email, String password) async {
     print('Email: ${userMap['email']}');
 
     // Example accelerometer and heart rate lists
-    List examplelistOrg = [-2, 5, -10];
-    List examplelist_heart = [75, 5, 800];
+    // List examplelistOrg = [-2, 5, -10];
+    // List examplelist_heart = [75, 5, 800];
 
     // Add example data
-    await addAccelerometerData(pb, userMap['id'], 1734013485, examplelistOrg);
-    await addHeartrateData(pb, userMap['id'], 1734013485, examplelist_heart);
+    // await addAccelerometerData(pb, userMap['id'], 1734013485, examplelistOrg);
+    // await addHeartrateData(pb, userMap['id'], 1734013485, examplelist_heart);
 
     // Fetch data with timestamp range
     int timestampFrom = 1734013000;

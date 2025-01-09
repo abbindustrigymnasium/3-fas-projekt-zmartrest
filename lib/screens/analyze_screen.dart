@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:zmartrest/widgets/select_user_search.dart';
 import 'package:zmartrest/pocketbase.dart';
-import 'package:zmartrest/widgets/data_visualization.dart';
+import 'package:zmartrest/screens/data_visualization_screen.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
@@ -12,12 +12,12 @@ class AnalyzeScreen extends StatefulWidget {
 }
 
 class _AnalyzeScreenState extends State<AnalyzeScreen> {
-
   // List to store users
   List<Map<String, dynamic>> users = [];
 
   Map<String, dynamic>? _selectedUser;
   bool _isLoading = true;
+  bool _hide_select_user = false;
 
   @override
   void initState() {
@@ -48,36 +48,31 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.only(bottom: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Text("Start by selecting a user", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : SelectUserWithSearch(
-                      users: users,
-                      onUserSelected: (user) {
-                        setState(() {
-                          _selectedUser = user;
-                        });
-                      },
-                    ),
-              const SizedBox(height: 16),
-              // Display selected user info and data visualization
-              if (_selectedUser != null) ...[
-                Text('Selected User: ${_selectedUser!['name']}'),
-                Text('Email: ${_selectedUser!['email']}'),
-                DataVisualization(selectedUser: _selectedUser!),
-              ],
-            ]
-          )
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.only(bottom: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Start by selecting a user", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            if (_isLoading) const CircularProgressIndicator(),
+            if (_isLoading == false && _hide_select_user == false) SelectUserWithSearch(
+                    users: users,
+                    onUserSelected: (user) {
+                      setState(() {
+                        _selectedUser = user;
+                        _hide_select_user = true;
+                      });
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => DataVisualizationScreen(selectedUser: _selectedUser!),
+                        ),
+                      );
+                    },
+                  ),
+          ]
         )
       )
     );
