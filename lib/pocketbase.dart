@@ -3,7 +3,7 @@
 
 import 'package:pocketbase/pocketbase.dart';
 
-final pb = PocketBase('https://zmartrest-pb.cloud.spetsen.net/');
+final pb = PocketBase('https://zmartrest-pb.superdator.spetsen.net/');
 
 authenticateUser(String email, String password) async {
   // Authenticate the user
