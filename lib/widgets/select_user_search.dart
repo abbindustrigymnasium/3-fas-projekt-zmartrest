@@ -27,7 +27,7 @@ class _SelectUserWithSearchState extends State<SelectUserWithSearch> {
   @override
   Widget build(BuildContext context) {
     return ShadSelect<String>.withSearch(
-      minWidth: 180,
+      minWidth: 300,
       maxWidth: 300,
       placeholder: const Text('Select'),
       onSearchChanged: (value) => setState(() => searchValue = value),

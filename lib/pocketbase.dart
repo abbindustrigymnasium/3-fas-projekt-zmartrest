@@ -160,14 +160,19 @@ Future<List<Map<String, dynamic>>> fetchHeartrateData(
 }
 
 // Fetch all data (accelerometer + heart rate) within a timestamp range
-Future<void> fetchAllDataFromTo(
-    PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
+Future fetchAllDataFromTo(PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
   print('Fetching all data within range...');
   final accelerometerData =
-      await fetchAccelerometerData(pb, userId, timestampFrom, timestampTo);
+    await fetchAccelerometerData(pb, userId, timestampFrom, timestampTo);
   final heartrateData =
-      await fetchHeartrateData(pb, userId, timestampFrom, timestampTo);
+    await fetchHeartrateData(pb, userId, timestampFrom, timestampTo);
 
+  return {
+    'accelerometer': accelerometerData,
+    'heartrate': heartrateData,
+  };
+
+  /*
   print('Combined data within range:');
   print('Accelerometer Data:');
   for (var data in accelerometerData) {
@@ -178,6 +183,7 @@ Future<void> fetchAllDataFromTo(
   for (var data in heartrateData) {
     print(data);
   }
+  */
 }
 
 Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {

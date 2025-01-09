@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-//import './screens/login_screen.dart';
+
 import 'package:zmartrest/main_scaffold.dart';
+//import './screens/login_screen.dart';
 
 // Temporary bypass login
-import 'pocketbase.dart'; 
+import 'pocketbase.dart';
 
 void main() {
-  authenticateUser('alwin.forslund@hitachigymnasiet.se', 'Jagälskarspetsen');
   runApp(const MyApp());
   // Temporary bypass login
   authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         textTheme: ShadTextTheme(family: 'RedHatDisplay')
       ),
       darkTheme: ShadThemeData(
-        colorScheme: const ShadNeutralColorScheme.dark(), 
+        colorScheme: const ShadNeutralColorScheme.dark(),
         brightness: Brightness.dark, 
         textTheme: ShadTextTheme(family: 'RedHatDisplay')
       ),
