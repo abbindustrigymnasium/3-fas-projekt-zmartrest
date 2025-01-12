@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:zmartrest/screens/account_screen.dart';
 import 'package:zmartrest/screens/device_screen.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
+import 'package:zmartrest/screens/settings_screen.dart';
+import 'package:zmartrest/screens/data_visualization_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
 
 class MainScaffold extends StatefulWidget {
-  const MainScaffold({super.key});
+  final Function(String) onThemeChanged; // Add the onThemeChanged callback
+
+  const MainScaffold({super.key, required this.onThemeChanged});
 
   @override
   _MainScaffoldState createState() => _MainScaffoldState();
@@ -14,26 +18,41 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
+  Map<String, dynamic>? _selectedUser;
 
-  static final List<Widget> _screens = [
-    const AccountScreen(),
-    const AnalyzeScreen(),
-    const DeviceScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  Widget _getAnalyzeScreen() {
+    if (_selectedUser == null) {
+      return AnalyzeScreen(
+        onUserSelected: (user) {
+          setState(() {
+            _selectedUser = user;
+          });
+        },
+      );
+    } else {
+      return DataVisualizationScreen(selectedUser: _selectedUser!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> baseScreens = [
+      SettingsScreen(
+        onThemeChanged: widget.onThemeChanged, // Pass the callback to SettingsScreen
+      ),
+      _getAnalyzeScreen(),
+      const DeviceScreen(),
+    ];
+
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: baseScreens[_selectedIndex],
       bottomNavigationBar: CustomBottomNavigation(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }

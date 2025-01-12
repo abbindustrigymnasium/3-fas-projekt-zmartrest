@@ -74,12 +74,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40, top: 40),
                   child: ShadDateRangePickerFormField(
+                    width: 340,
                     label: const Text('Select date range'),
-                    /*
-                    description: const Text(
-                      'Select the range of dates you want to analyze data between.',
-                    ),
-                    */
                     validator: (v) {
                       if (v == null) return 'A range of dates is required.';
                       if (v.start == null) return 'The start date is required.';
@@ -114,20 +110,34 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           child: LineChart(
                             LineChartData(
                               titlesData: FlTitlesData(
+                                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
+                                    reservedSize: 22,
+                                    interval: 3600,
                                     getTitlesWidget: (value, meta) {
                                       final date = DateTime.fromMillisecondsSinceEpoch(
                                           (value * 1000).toInt());
                                       return Text(
                                         DateFormat('HH:mm').format(date),
-                                        style: const TextStyle(fontSize: 10),
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                       );
                                     },
                                   ),
                                 ),
                               ),
+                              gridData: FlGridData(
+                                horizontalInterval: 10, // Adjust based on your data range
+                                verticalInterval: 3600, // Hour intervals
+                              ),
+                              borderData: FlBorderData(show: true),
+                              minY: heartRateData.isEmpty ? 0 : 
+                                heartRateData.map((e) => (e['hr'] as num).toDouble())
+                                  .reduce((a, b) => a < b ? a : b) - 5,
+                              maxY: heartRateData.isEmpty ? 100 : 
+                                heartRateData.map((e) => (e['hr'] as num).toDouble())
+                                  .reduce((a, b) => a > b ? a : b) + 5,
                               lineBarsData: [
                                 LineChartBarData(
                                   spots: heartRateData
@@ -156,13 +166,16 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         ),
                         const SizedBox(height: 10),
                         SizedBox(
-                          height: 200,
+                          height: 300,
                           child: LineChart(
                             LineChartData(
                               titlesData: FlTitlesData(
+                                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
                                     showTitles: true,
+                                    reservedSize: 22,
+                                    interval: 3600, // Show hour intervals
                                     getTitlesWidget: (value, meta) {
                                       final date = DateTime.fromMillisecondsSinceEpoch(
                                           (value * 1000).toInt());
@@ -174,6 +187,22 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   ),
                                 ),
                               ),
+                              gridData: FlGridData(
+                                horizontalInterval: 10,
+                                verticalInterval: 3600,
+                              ),
+                              minY: accelerometerData.isEmpty ? 0 : 
+                                [
+                                  ...accelerometerData.map((e) => (e['x'] as num).toDouble()),
+                                  ...accelerometerData.map((e) => (e['y'] as num).toDouble()),
+                                  ...accelerometerData.map((e) => (e['z'] as num).toDouble()),
+                                ].reduce((a, b) => a < b ? a : b) - 5,
+                              maxY: accelerometerData.isEmpty ? 0 :
+                                [
+                                  ...accelerometerData.map((e) => (e['x'] as num).toDouble()),
+                                  ...accelerometerData.map((e) => (e['y'] as num).toDouble()),
+                                  ...accelerometerData.map((e) => (e['z'] as num).toDouble()),
+                                ].reduce((a, b) => a > b ? a : b) + 5,
                               lineBarsData: [
                                 // X axis
                                 LineChartBarData(

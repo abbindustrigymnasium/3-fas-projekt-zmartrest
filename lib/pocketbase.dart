@@ -19,13 +19,26 @@ authenticateUser(String email, String password) async {
     print('ID: ${userMap['id']}');
     print('Email: ${userMap['email']}');
 
-    // Example accelerometer and heart rate lists
-    // List examplelistOrg = [-2, 5, -10];
-    // List examplelist_heart = [75, 5, 800];
-
-    // Add example data
-    // await addAccelerometerData(pb, userMap['id'], 1734013485, examplelistOrg);
-    // await addHeartrateData(pb, userMap['id'], 1734013485, examplelist_heart);
+    /*
+    await addHeartrateData(pb, userMap['id'], 1734013490, [80, 10, 850]);
+    await addHeartrateData(pb, userMap['id'], 1734013385, [75, 5, 800]);
+    await addHeartrateData(pb, userMap['id'], 1734013270, [78, 8, 810]);
+    await addHeartrateData(pb, userMap['id'], 1734013150, [82, 12, 870]);
+    await addHeartrateData(pb, userMap['id'], 1734013000, [77, 7, 780]);
+    await addHeartrateData(pb, userMap['id'], 1734012905, [79, 6, 820]);
+    await addHeartrateData(pb, userMap['id'], 1734012780, [83, 9, 860]);
+    await addHeartrateData(pb, userMap['id'], 1734012650, [76, 4, 790]);
+    await addHeartrateData(pb, userMap['id'], 1734012505, [81, 11, 840]);
+    await addHeartrateData(pb, userMap['id'], 1734012390, [74, 3, 770]);
+    await addHeartrateData(pb, userMap['id'], 1734012280, [79, 10, 830]);
+    await addHeartrateData(pb, userMap['id'], 1734012175, [80, 8, 850]);
+    await addHeartrateData(pb, userMap['id'], 1734012050, [76, 6, 780]);
+    await addHeartrateData(pb, userMap['id'], 1734011930, [84, 7, 880]);
+    await addHeartrateData(pb, userMap['id'], 1734011805, [75, 5, 800]);
+    await addHeartrateData(pb, userMap['id'], 1734011690, [81, 9, 840]);
+    await addHeartrateData(pb, userMap['id'], 1734011570, [78, 8, 810]);
+    await addHeartrateData(pb, userMap['id'], 1734011450, [83, 6, 860]);
+    */
 
     // Fetch data with timestamp range
     int timestampFrom = 1734013000;
@@ -40,6 +53,48 @@ authenticateUser(String email, String password) async {
     return true;
   } catch (e) {
     print('Error during authentication: $e');
+  }
+}
+
+Future<Map<String, dynamic>?> getUserInfo() async {
+  try {
+    // Check if the user is authenticated by accessing the authenticated user record
+    final authData = pb.authStore.record;
+
+    if (authData == null) {
+      print('User is not authenticated');
+      return null;  // Return null if the user is not authenticated
+    }
+
+    final userId = authData.id;
+
+    // Fetch user information using userId
+    final userRecord = await pb.collection('users').getOne(userId);
+
+    // Map the user data to a readable format
+    final userInfo = {
+      'id': userRecord.id,
+      'email': userRecord.data['email'],
+      'username': userRecord.data['name'],
+      'created': userRecord.data['created'],
+      'updated': userRecord.data['updated'],
+      // Add any other fields you want to retrieve
+    };
+
+    return userInfo;
+  } catch (e) {
+    print('Error fetching user info: $e');
+    return null;  // Return null in case of error
+  }
+}
+
+void logout() {
+  try {
+    // Clear the auth session
+    pb.authStore.clear();
+    print('User logged out successfully.');
+  } catch (e) {
+    print('Error during logout: $e');
   }
 }
 
@@ -196,7 +251,7 @@ Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {
     List<Map<String, dynamic>> users = result.items.map((record) {
       return {
         'id': record.id,
-        'name': record.data['username'] ?? '',
+        'name': record.data['name'] ?? '',
         'email': record.data['email'] ?? '',
       };
     }).toList();

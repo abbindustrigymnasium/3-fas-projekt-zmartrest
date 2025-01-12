@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-void main() {
-  runApp(const DeviceScreen());
-}
-
 const identifier = 'C36A972B';
 final polar = Polar();
 

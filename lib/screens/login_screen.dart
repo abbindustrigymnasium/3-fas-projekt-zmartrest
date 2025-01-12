@@ -4,7 +4,9 @@ import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/pocketbase.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final Function(String) onThemeChanged; // Accept a callback for theme changes
+
+  const LoginScreen({super.key, required this.onThemeChanged});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -49,7 +51,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const MainScaffold(),
+          builder: (context) => MainScaffold(
+            onThemeChanged: widget.onThemeChanged, // Pass the theme change callback
+          ),
         ),
       );
     } else {

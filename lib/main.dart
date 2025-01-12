@@ -13,26 +13,40 @@ void main() {
   authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  void _setTheme(String theme) {
+    setState(() {
+      _themeMode = theme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return ShadApp(
       theme: ShadThemeData(
-        colorScheme: const ShadNeutralColorScheme.light(), 
-        brightness: Brightness.light, 
-        textTheme: ShadTextTheme(family: 'RedHatDisplay')
+        colorScheme: const ShadNeutralColorScheme.light(),
+        brightness: Brightness.light,
+        textTheme: ShadTextTheme(family: 'RedHatDisplay'),
       ),
       darkTheme: ShadThemeData(
-        colorScheme: const ShadNeutralColorScheme.dark(),
-        brightness: Brightness.dark, 
-        textTheme: ShadTextTheme(family: 'RedHatDisplay')
+        colorScheme: const ShadNeutralColorScheme.dark(
+          background: Color.fromARGB(255, 15, 15, 15)
+        ),
+        brightness: Brightness.dark,
+        textTheme: ShadTextTheme(family: 'RedHatDisplay'),
       ),
-      // Temporary bypass login
-      //home: const LoginScreen(),
-      themeMode: ThemeMode.light,
-      home: const MainScaffold(),
+      themeMode: _themeMode,
+      home: MainScaffold(onThemeChanged: _setTheme),
+      //home: LoginScreen(onThemeChanged: _setTheme),
     );
   }
 }
