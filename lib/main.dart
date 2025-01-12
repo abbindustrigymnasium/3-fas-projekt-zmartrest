@@ -8,19 +8,19 @@ import 'package:zmartrest/main_scaffold.dart';
 import 'pocketbase.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const App());
   // Temporary bypass login
   authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class App extends StatefulWidget {
+  const App({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<App> createState() => _AppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AppState extends State<App> {
   ThemeMode _themeMode = ThemeMode.light;
 
   void _setTheme(String theme) {
@@ -45,8 +45,14 @@ class _MyAppState extends State<MyApp> {
         textTheme: ShadTextTheme(family: 'RedHatDisplay'),
       ),
       themeMode: _themeMode,
-      home: MainScaffold(onThemeChanged: _setTheme),
-      //home: LoginScreen(onThemeChanged: _setTheme),
+      home: MainScaffold(
+        onThemeChanged: _setTheme,
+        currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+      ),
+      //home: LoginScreen(
+      //  onThemeChanged: _setTheme,
+      //  currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+      // ),
     );
   }
 }

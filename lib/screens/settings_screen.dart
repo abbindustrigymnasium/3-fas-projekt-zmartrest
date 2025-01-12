@@ -8,8 +8,9 @@ import 'package:zmartrest/pocketbase.dart';
 
 class SettingsScreen extends StatelessWidget {
   final Function(String) onThemeChanged;
+  final String currentTheme;
 
-  const SettingsScreen({super.key, required this.onThemeChanged});
+  const SettingsScreen({super.key, required this.onThemeChanged, required this.currentTheme});
 
   Future<Map<String, dynamic>?> _getUserInfo() async {
     return await getUserInfo();  // Fetch user info from PocketBase
@@ -75,7 +76,7 @@ class SettingsScreen extends StatelessWidget {
                       logout();
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => LoginScreen(onThemeChanged: onThemeChanged),
+                          builder: (context) => LoginScreen(onThemeChanged: onThemeChanged, currentTheme: currentTheme),
                         ),
                       );
                     },
@@ -114,8 +115,8 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                   ShadSelectThemeWidget(
-                    initialTheme: 'light', // Set a default value
                     onThemeChanged: onThemeChanged,
+                    initialValue: currentTheme,
                   ),
                 ],
               );
@@ -125,60 +126,4 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-
-  /*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(padding: const EdgeInsets.only(bottom: 10, left: 1), child: const Text("Account", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
-              // display user info
-              // ...
-              ConfirmButton(buttonText: "Logout", dialogTitle: "Confirm Logout", dialogDescription: "Are you sure you want to logout?", onConfirm: () {
-                logout();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(onThemeChanged: onThemeChanged,),
-                  ),
-                );
-              }),
-              const SizedBox(height: 80),
-              Padding(padding: const EdgeInsets.only(bottom: 10, left: 1), child: const Text("Language", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
-              ShadSelect(
-                initialValue: 'English',
-                maxHeight: 200,
-                minWidth: 300,
-                options: ['English', 'Swedish'].map(
-                  (option) => ShadOption(
-                    value: option,
-                    child: Text(option),
-                  ),
-                ),
-                selectedOptionBuilder: (context, value) {
-                  return Text(value);
-                },
-                onChanged: (value) {
-                  // Your code to handle the selected value
-                },
-              ),
-              const SizedBox(height: 20),
-              Padding(padding: const EdgeInsets.only(bottom: 10, left: 1), child: const Text("Theme", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
-              ShadSelectThemeWidget(
-                initialTheme: 'light', // Set a default value
-                onThemeChanged: onThemeChanged,
-              ),
-            ],
-          )
-        )
-      ),
-    );
-  }
-  */
 }

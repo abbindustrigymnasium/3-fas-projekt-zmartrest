@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:zmartrest/screens/account_screen.dart';
 import 'package:zmartrest/screens/device_screen.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
 import 'package:zmartrest/screens/settings_screen.dart';
@@ -9,8 +8,9 @@ import 'package:zmartrest/widgets/bottom_nav.dart';
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
+  final String currentTheme;
 
-  const MainScaffold({super.key, required this.onThemeChanged});
+  const MainScaffold({super.key, required this.onThemeChanged, required this.currentTheme});
 
   @override
   _MainScaffoldState createState() => _MainScaffoldState();
@@ -39,6 +39,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     final List<Widget> baseScreens = [
       SettingsScreen(
         onThemeChanged: widget.onThemeChanged, // Pass the callback to SettingsScreen
+        currentTheme: widget.currentTheme,
       ),
       _getAnalyzeScreen(),
       const DeviceScreen(),

@@ -5,8 +5,9 @@ import 'package:zmartrest/pocketbase.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(String) onThemeChanged; // Accept a callback for theme changes
+  final String currentTheme;
 
-  const LoginScreen({super.key, required this.onThemeChanged});
+  const LoginScreen({super.key, required this.onThemeChanged, required this.currentTheme});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _emailError;
   String? _passwordError;
 
+  /*
   void _validateFields() {
     setState(() {
       _emailError = _emailController.text.trim().isEmpty
@@ -30,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
           : null;
     });
   }
+  */
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
@@ -53,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (context) => MainScaffold(
             onThemeChanged: widget.onThemeChanged, // Pass the theme change callback
+            currentTheme: widget.currentTheme,
           ),
         ),
       );

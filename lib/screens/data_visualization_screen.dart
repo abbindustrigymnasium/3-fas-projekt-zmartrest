@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/pocketbase.dart';
@@ -107,50 +107,46 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         const SizedBox(height: 10),
                         SizedBox(
                           height: 200,
-                          child: LineChart(
-                            LineChartData(
-                              titlesData: FlTitlesData(
-                                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 22,
-                                    interval: 3600,
-                                    getTitlesWidget: (value, meta) {
-                                      final date = DateTime.fromMillisecondsSinceEpoch(
-                                          (value * 1000).toInt());
-                                      return Text(
-                                        DateFormat('HH:mm').format(date),
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              gridData: FlGridData(
-                                horizontalInterval: 10, // Adjust based on your data range
-                                verticalInterval: 3600, // Hour intervals
-                              ),
-                              borderData: FlBorderData(show: true),
-                              minY: heartRateData.isEmpty ? 0 : 
-                                heartRateData.map((e) => (e['hr'] as num).toDouble())
-                                  .reduce((a, b) => a < b ? a : b) - 5,
-                              maxY: heartRateData.isEmpty ? 100 : 
-                                heartRateData.map((e) => (e['hr'] as num).toDouble())
-                                  .reduce((a, b) => a > b ? a : b) + 5,
-                              lineBarsData: [
-                                LineChartBarData(
-                                  spots: heartRateData
-                                      .map((data) => FlSpot(
-                                            data['timestamp'].toDouble(),
-                                            data['hr'].toDouble(),
-                                          ))
-                                      .toList(),
-                                  color: Colors.red,
-                                  dotData: const FlDotData(show: false),
-                                ),
-                              ],
+                          child: SfCartesianChart(
+                            tooltipBehavior: TooltipBehavior(enable: true),
+                            primaryXAxis: DateTimeCategoryAxis(
+                              intervalType: DateTimeIntervalType.hours,
+                              dateFormat: DateFormat('HH:mm'),
                             ),
+                            primaryYAxis: NumericAxis(
+                              minimum: heartRateData.isEmpty
+                                  ? 0
+                                  : heartRateData
+                                          .map((e) => (e['hr'] as num).toDouble())
+                                          .reduce((a, b) => a < b ? a : b) -
+                                      5,
+                              maximum: heartRateData.isEmpty
+                                  ? 100
+                                  : heartRateData
+                                          .map((e) => (e['hr'] as num).toDouble())
+                                          .reduce((a, b) => a > b ? a : b) +
+                                      5,
+                            ),
+                            series: <CartesianSeries<dynamic, dynamic>>[
+                              SplineSeries<Map<String, dynamic>, DateTime>(
+                                dataSource: heartRateData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        (data['timestamp'] * 1000).toInt()),
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    (data['hr'] as num).toDouble(),
+                                color: Colors.redAccent,
+                                enableTooltip: true,
+                                markerSettings: MarkerSettings(
+                                  isVisible: true, // Enable markers
+                                  shape: DataMarkerType.circle, // Shape of the markers
+                                  color: Colors.white, // Color of the markers
+                                  width: 6,
+                                  height: 6,
+                                  borderWidth: 0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -167,78 +163,72 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         const SizedBox(height: 10),
                         SizedBox(
                           height: 300,
-                          child: LineChart(
-                            LineChartData(
-                              titlesData: FlTitlesData(
-                                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 22,
-                                    interval: 3600, // Show hour intervals
-                                    getTitlesWidget: (value, meta) {
-                                      final date = DateTime.fromMillisecondsSinceEpoch(
-                                          (value * 1000).toInt());
-                                      return Text(
-                                        DateFormat('HH:mm').format(date),
-                                        style: const TextStyle(fontSize: 10),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              gridData: FlGridData(
-                                horizontalInterval: 10,
-                                verticalInterval: 3600,
-                              ),
-                              minY: accelerometerData.isEmpty ? 0 : 
-                                [
-                                  ...accelerometerData.map((e) => (e['x'] as num).toDouble()),
-                                  ...accelerometerData.map((e) => (e['y'] as num).toDouble()),
-                                  ...accelerometerData.map((e) => (e['z'] as num).toDouble()),
-                                ].reduce((a, b) => a < b ? a : b) - 5,
-                              maxY: accelerometerData.isEmpty ? 0 :
-                                [
-                                  ...accelerometerData.map((e) => (e['x'] as num).toDouble()),
-                                  ...accelerometerData.map((e) => (e['y'] as num).toDouble()),
-                                  ...accelerometerData.map((e) => (e['z'] as num).toDouble()),
-                                ].reduce((a, b) => a > b ? a : b) + 5,
-                              lineBarsData: [
-                                // X axis
-                                LineChartBarData(
-                                  spots: accelerometerData
-                                      .map((data) => FlSpot(
-                                            data['timestamp'].toDouble(),
-                                            data['x'].toDouble(),
-                                          ))
-                                      .toList(),
-                                  color: Colors.blue,
-                                  dotData: const FlDotData(show: false),
-                                ),
-                                // Y axis
-                                LineChartBarData(
-                                  spots: accelerometerData
-                                      .map((data) => FlSpot(
-                                            data['timestamp'].toDouble(),
-                                            data['y'].toDouble(),
-                                          ))
-                                      .toList(),
-                                  color: Colors.green,
-                                  dotData: const FlDotData(show: false),
-                                ),
-                                // Z axis
-                                LineChartBarData(
-                                  spots: accelerometerData
-                                      .map((data) => FlSpot(
-                                            data['timestamp'].toDouble(),
-                                            data['z'].toDouble(),
-                                          ))
-                                      .toList(),
-                                  color: Colors.orange,
-                                  dotData: const FlDotData(show: false),
-                                ),
-                              ],
+                          child: SfCartesianChart(
+                            tooltipBehavior: TooltipBehavior(enable: true),
+                            primaryXAxis: DateTimeCategoryAxis(
+                              intervalType: DateTimeIntervalType.hours,
+                              dateFormat: DateFormat('HH:mm'),
                             ),
+                            primaryYAxis: NumericAxis(),
+                            series: <CartesianSeries<dynamic, dynamic>>[
+                              // X axis
+                              SplineSeries<Map<String, dynamic>, DateTime>(
+                                dataSource: accelerometerData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        (data['timestamp'] * 1000).toInt()),
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    (data['x'] as num).toDouble(),
+                                color: Colors.blue,
+                                enableTooltip: true,
+                                markerSettings: MarkerSettings(
+                                  isVisible: true, // Enable markers
+                                  shape: DataMarkerType.circle, // Shape of the markers
+                                  color: Colors.white, // Color of the markers
+                                  width: 6,
+                                  height: 6,
+                                  borderWidth: 0,
+                                ),
+                              ),
+                              // Y axis
+                              SplineSeries<Map<String, dynamic>, DateTime>(
+                                dataSource: accelerometerData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        (data['timestamp'] * 1000).toInt()),
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    (data['y'] as num).toDouble(),
+                                color: Colors.green,
+                                enableTooltip: true,
+                                markerSettings: MarkerSettings(
+                                  isVisible: true, // Enable markers
+                                  shape: DataMarkerType.circle, // Shape of the markers
+                                  color: Colors.white, // Color of the markers
+                                  width: 6,
+                                  height: 6,
+                                  borderWidth: 0,
+                                ),
+                              ),
+                              // Z axis
+                              SplineSeries<Map<String, dynamic>, DateTime>(
+                                dataSource: accelerometerData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        (data['timestamp'] * 1000).toInt()),
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    (data['z'] as num).toDouble(),
+                                color: Colors.orange,
+                                enableTooltip: true,
+                                markerSettings: MarkerSettings(
+                                  isVisible: true, // Enable markers
+                                  shape: DataMarkerType.circle, // Shape of the markers
+                                  color: Colors.white, // Color of the markers
+                                  width: 6,
+                                  height: 6,
+                                  borderWidth: 0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         // Legend for accelerometer data
@@ -262,10 +252,10 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                   const Text('Select a date range to view data'),
               ],
             ),
-          ), 
-        )
-      )
-    ); 
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -286,7 +276,10 @@ class _LegendItem extends StatelessWidget {
         Container(
           width: 16,
           height: 3,
-          color: color,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
         const SizedBox(width: 4),
         Text(label),

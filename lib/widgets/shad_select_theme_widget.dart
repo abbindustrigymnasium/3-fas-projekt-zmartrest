@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-extension StringExtensions on String { 
-  String capitalize() { 
-    return "${this[0].toUpperCase()}${this.substring(1)}"; 
-  } 
-} 
+import 'package:zmartrest/util/app_utils.dart';
 
 class ShadSelectThemeWidget extends StatelessWidget {
-  final String initialTheme;
   final ValueChanged<String> onThemeChanged;
+  final String initialValue;
 
   const ShadSelectThemeWidget({
     Key? key,
-    required this.initialTheme,
     required this.onThemeChanged,
+    required this.initialValue,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ShadSelect(
-      initialValue: initialTheme,
+      initialValue: initialValue,
       maxHeight: 200,
       minWidth: 300,
       options: ['light', 'dark'].map(

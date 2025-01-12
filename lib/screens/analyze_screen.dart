@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:zmartrest/widgets/select_user_search.dart';
 import 'package:zmartrest/pocketbase.dart';
-import 'package:zmartrest/screens/data_visualization_screen.dart';
-import 'package:zmartrest/main_scaffold.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onUserSelected;
