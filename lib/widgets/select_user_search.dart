@@ -27,8 +27,7 @@ class _SelectUserWithSearchState extends State<SelectUserWithSearch> {
   @override
   Widget build(BuildContext context) {
     return ShadSelect<String>.withSearch(
-      minWidth: 300,
-      maxWidth: 300,
+      minWidth: MediaQuery.of(context).size.width - 60,
       placeholder: const Text('Select'),
       onSearchChanged: (value) => setState(() => searchValue = value),
       searchPlaceholder: const Text('Search by name or email'),

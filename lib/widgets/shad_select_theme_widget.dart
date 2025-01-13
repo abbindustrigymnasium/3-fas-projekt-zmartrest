@@ -18,7 +18,7 @@ class ShadSelectThemeWidget extends StatelessWidget {
     return ShadSelect(
       initialValue: initialValue,
       maxHeight: 200,
-      minWidth: 300,
+      minWidth: MediaQuery.of(context).size.width - 60,
       options: ['light', 'dark'].map(
         (option) => ShadOption(
           value: option,

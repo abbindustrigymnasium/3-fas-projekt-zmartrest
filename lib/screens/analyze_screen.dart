@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/widgets/select_user_search.dart';
 import 'package:zmartrest/pocketbase.dart';
+import 'data_visualization_screen.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onUserSelected;
+  final String currentTheme;
   
   const AnalyzeScreen({
     super.key, 
     required this.onUserSelected,
+    required this.currentTheme,
   });
 
   @override
@@ -21,7 +25,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   Map<String, dynamic>? _selectedUser;
   bool _isLoading = true;
-  bool _hide_select_user = false;
 
   @override
   void initState() {
@@ -51,30 +54,41 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.only(bottom: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Start by selecting a user", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          if (_isLoading) const CircularProgressIndicator(),
-          if (_isLoading == false && _hide_select_user == false) 
-            SelectUserWithSearch(
-              users: users,
-              onUserSelected: (user) {
-                setState(() {
-                  _selectedUser = user;
-                  _hide_select_user = true;
-                });
-                widget.onUserSelected(user); // Call the callback instead of navigating
-              },
+    return SingleChildScrollView(
+      child: Container(
+        alignment: Alignment.center,
+        padding: _selectedUser == null ? EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4) : EdgeInsets.only(top: 60),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              child: Column(
+                crossAxisAlignment: _selectedUser == null ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                children: [
+                  if (_selectedUser == null) const Text("Start by selecting a user", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)) else const Text("Selected user", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  if (_isLoading) const CircularProgressIndicator(),
+                  if (_isLoading == false) 
+                    SelectUserWithSearch(
+                      users: users,
+                      onUserSelected: (user) {
+                        setState(() {
+                          _selectedUser = user;
+                        });
+                        widget.onUserSelected(user); // Call the callback instead of navigating
+                      },
+                    ),
+                ],
+              ),
             ),
-        ]
-      )
+            if (_selectedUser != null) ...[
+              DataVisualizationScreen(selectedUser: _selectedUser!, currentTheme: widget.currentTheme),
+            ]
+          ]
+        )
+      ),
     );
   }
 }

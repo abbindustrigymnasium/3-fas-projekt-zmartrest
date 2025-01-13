@@ -20,6 +20,7 @@ authenticateUser(String email, String password) async {
     print('Email: ${userMap['email']}');
 
     /*
+    // Test data
     await addHeartrateData(pb, userMap['id'], 1734013490, [80, 10, 850]);
     await addHeartrateData(pb, userMap['id'], 1734013385, [75, 5, 800]);
     await addHeartrateData(pb, userMap['id'], 1734013270, [78, 8, 810]);

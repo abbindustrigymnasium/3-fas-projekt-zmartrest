@@ -35,14 +35,16 @@ class _AppState extends State<App> {
       theme: ShadThemeData(
         colorScheme: const ShadNeutralColorScheme.light(),
         brightness: Brightness.light,
-        textTheme: ShadTextTheme(family: 'RedHatDisplay'),
+        //textTheme: ShadTextTheme(family: 'RedHatDisplay'),
+        textTheme: ShadTextTheme(family: 'Inter'),
       ),
       darkTheme: ShadThemeData(
         colorScheme: const ShadNeutralColorScheme.dark(
           background: Color.fromARGB(255, 15, 15, 15)
         ),
         brightness: Brightness.dark,
-        textTheme: ShadTextTheme(family: 'RedHatDisplay'),
+        //textTheme: ShadTextTheme(family: 'RedHatDisplay'),
+        textTheme: ShadTextTheme(family: 'Inter'),
       ),
       themeMode: _themeMode,
       home: MainScaffold(
