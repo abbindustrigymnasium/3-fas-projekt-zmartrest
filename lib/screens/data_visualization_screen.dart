@@ -2,16 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:zmartrest/pocketbase.dart';
-
 class DataVisualizationScreen extends StatefulWidget {
   final Map<String, dynamic> selectedUser;
   final String currentTheme;
+  final List<Map<String, dynamic>> accelerometerData;
+  final List<Map<String, dynamic>> heartRateData;
+  final ShadDateTimeRange? selectedDateRange;
+  final Function(ShadDateTimeRange range) onDateRangeSelected;
+  final bool isLoading;
+  final bool hasFetchedData;
 
   const DataVisualizationScreen({
     Key? key,
     required this.selectedUser,
     required this.currentTheme,
+    required this.accelerometerData,
+    required this.heartRateData,
+    this.selectedDateRange,
+    required this.onDateRangeSelected,
+    required this.isLoading,
+    required this.hasFetchedData,
   }) : super(key: key);
 
   @override
@@ -19,45 +29,7 @@ class DataVisualizationScreen extends StatefulWidget {
 }
 
 class _DataVisualizationState extends State<DataVisualizationScreen> {
-  List<Map<String, dynamic>> accelerometerData = [];
-  List<Map<String, dynamic>> heartRateData = [];
-  bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
-
-  Future<void> _fetchData(ShadDateTimeRange range) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // Convert DateTime to Unix timestamp
-      final startTimestamp = range.start!.millisecondsSinceEpoch ~/ 1000;
-      final endTimestamp = range.end!.millisecondsSinceEpoch ~/ 1000;
-
-      // Fetch all data
-      final allData = await fetchAllDataFromTo(
-        pb,
-        widget.selectedUser['id'],
-        startTimestamp,
-        endTimestamp,
-      );
-
-      setState(() {
-        accelerometerData = allData['accelerometer'] ?? [];
-        heartRateData = allData['heartrate'] ?? [];
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching data: $e')),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +47,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
               child: ShadDateRangePickerFormField(
                 width: MediaQuery.of(context).size.width - 60,
                 label: const Text('Select date range'),
+                initialValue: widget.selectedDateRange,
                 validator: (v) {
                   if (v == null) return 'A range of dates is required.';
                   if (v.start == null) return 'The start date is required.';
@@ -83,19 +56,22 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                 },
                 onChanged: (ShadDateTimeRange? range) {
                   if (range?.start != null && range?.end != null) {
-                    _fetchData(range!);
+                    widget.onDateRangeSelected(range!);
                   }
                 },
               ),
             ),
             const SizedBox(height: 20),
-            if (isLoading)
+            if (widget.isLoading)
               const CircularProgressIndicator()
-            else if (accelerometerData.isNotEmpty || heartRateData.isNotEmpty)
+            else if (!widget.hasFetchedData)
+              const Text('Select a date range to fetch data')
+            else if (widget.hasFetchedData && 
+                    (widget.accelerometerData.isNotEmpty || widget.heartRateData.isNotEmpty))
               Column(
                 children: [
                   // Heart Rate Chart
-                  if (heartRateData.isNotEmpty) ...[
+                  if (widget.heartRateData.isNotEmpty) ...[
                     const Text(
                       'Heart Rate Data',
                       style: TextStyle(
@@ -107,7 +83,6 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                     SizedBox(
                       height: 200,
                       child: SfCartesianChart(
-                        //margin: EdgeInsets.zero,
                         tooltipBehavior: TooltipBehavior(enable: true),
                         primaryXAxis: DateTimeCategoryAxis(
                           intervalType: DateTimeIntervalType.hours,
@@ -115,15 +90,15 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           majorGridLines: const MajorGridLines(width: 0),
                         ),
                         primaryYAxis: NumericAxis(
-                          minimum: heartRateData.isEmpty
+                          minimum: widget.heartRateData.isEmpty
                               ? 0
-                              : heartRateData
+                              : widget.heartRateData
                                       .map((e) => (e['hr'] as num).toDouble())
                                       .reduce((a, b) => a < b ? a : b) -
                                   5,
-                          maximum: heartRateData.isEmpty
+                          maximum: widget.heartRateData.isEmpty
                               ? 100
-                              : heartRateData
+                              : widget.heartRateData
                                       .map((e) => (e['hr'] as num).toDouble())
                                       .reduce((a, b) => a > b ? a : b) +
                                   5,
@@ -132,7 +107,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         plotAreaBorderWidth: 0,
                         series: <CartesianSeries<dynamic, dynamic>>[
                           SplineSeries<Map<String, dynamic>, DateTime>(
-                            dataSource: heartRateData,
+                            dataSource: widget.heartRateData,
                             xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
@@ -141,9 +116,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.redAccent,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true, // Enable markers
-                              shape: DataMarkerType.circle, // Shape of the markers
-                              color: widget.currentTheme == 'light' ? Colors.white : Color.fromARGB(255, 15, 15, 15), // Color of the markers
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
                               width: 6,
                               height: 6,
                               borderWidth: 0,
@@ -155,7 +132,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                   ],
                   const SizedBox(height: 20),
                   // Accelerometer Chart
-                  if (accelerometerData.isNotEmpty) ...[
+                  if (widget.accelerometerData.isNotEmpty) ...[
                     const Text(
                       'Accelerometer Data',
                       style: TextStyle(
@@ -180,7 +157,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         series: <CartesianSeries<dynamic, dynamic>>[
                           // X axis
                           SplineSeries<Map<String, dynamic>, DateTime>(
-                            dataSource: accelerometerData,
+                            dataSource: widget.accelerometerData,
                             xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
@@ -189,9 +166,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.blue,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true, // Enable markers
-                              shape: DataMarkerType.circle, // Shape of the markers
-                              color: widget.currentTheme == 'light' ? Colors.white : Color.fromARGB(255, 15, 15, 15), // Color of the markers
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
                               width: 6,
                               height: 6,
                               borderWidth: 0,
@@ -199,7 +178,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           ),
                           // Y axis
                           SplineSeries<Map<String, dynamic>, DateTime>(
-                            dataSource: accelerometerData,
+                            dataSource: widget.accelerometerData,
                             xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
@@ -208,9 +187,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.green,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true, // Enable markers
-                              shape: DataMarkerType.circle, // Shape of the markers
-                              color: widget.currentTheme == 'light' ? Colors.white : Color.fromARGB(255, 15, 15, 15), // Color of the markers
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
                               width: 6,
                               height: 6,
                               borderWidth: 0,
@@ -218,7 +199,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           ),
                           // Z axis
                           SplineSeries<Map<String, dynamic>, DateTime>(
-                            dataSource: accelerometerData,
+                            dataSource: widget.accelerometerData,
                             xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
@@ -227,9 +208,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.orange,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true, // Enable markers
-                              shape: DataMarkerType.circle, // Shape of the markers
-                              color: widget.currentTheme == 'light' ? Colors.white : Color.fromARGB(255, 15, 15, 15), // Color of the markers
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
                               width: 6,
                               height: 6,
                               borderWidth: 0,
@@ -264,7 +247,6 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
   }
 }
 
-// Helper widget for the legend
 class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
