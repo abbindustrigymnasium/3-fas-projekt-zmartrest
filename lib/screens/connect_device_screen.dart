@@ -3,6 +3,7 @@ import 'package:polar/polar.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+
 import 'package:zmartrest/bluetooth_permission_handler.dart';
  
 class DeviceScreen extends StatefulWidget {
@@ -183,7 +184,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
   */
-
+ 
   void streamWhenReady() async {
     await polar.sdkFeatureReady.firstWhere(
       (e) =>
@@ -269,6 +270,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     }
   }
 }
+
 
 enum RecordingAction {
   start,
