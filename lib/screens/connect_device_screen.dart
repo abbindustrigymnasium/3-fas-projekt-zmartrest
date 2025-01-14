@@ -17,7 +17,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
   static const identifier = 'E985E828';
 
   final polar = Polar();
-  final logs = ['Log starting'];
+  final logs = [''];
+
+  String currentTab = "connect";
 
   PolarExerciseEntry? exerciseEntry;
 
@@ -69,20 +71,29 @@ class _DeviceScreenState extends State<DeviceScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              /*
               Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text("Connect your Polar device", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
               ),
+              */
               ShadTabs(
-                value: "connect",
-                tabBarConstraints: const BoxConstraints(maxWidth: 400),
-                contentConstraints: const BoxConstraints(maxWidth: 400),
+                //value: "connect",
+                value: currentTab,
+                onChanged: (value) {
+                  setState(() {
+                    currentTab = value; // Update the tab when user switches
+                  });
+                },
+                tabBarConstraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 40),
+                contentConstraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 40),
                 tabs: [
                   ShadTab(
                     value: "connect",
                     content: ShadCard(
                       title: const Text('Connect'),
-                      description: const Text("Connect your device."),
+                      description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Connect your device.")),
+                      width: MediaQuery.of(context).size.width - 40,
                       footer: ShadButton(
                         icon: const ShadImage(LucideIcons.cable),
                         onPressed: () async {
@@ -98,19 +109,19 @@ class _DeviceScreenState extends State<DeviceScreen> {
                         child: const Text('Connect'),
                       ),
                     ),
-                    child: const Text('Account'),
+                    child: const Text('Connect'),
                   ),
                   ShadTab(
                     value: "logs",
-                    child: ShadCard(
+                    content: ShadCard(
                       title: const Text('Logs'),
-                      description: const Text('Logs from device.'),
-                      child: ListView(
-                        padding: const EdgeInsets.all(10),
-                        shrinkWrap: true,
+                      description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Logs from device.")),
+                      width: MediaQuery.of(context).size.width - 40,
+                      child: Column(
                         children: logs.reversed.take(10).map(Text.new).toList(),
-                      ),
-                    )
+                      )
+                    ),
+                    child: Text("Logs"),
                   )
                 ],
               ),
