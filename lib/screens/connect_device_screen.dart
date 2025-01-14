@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:polar/polar.dart';
-import 'package:uuid/uuid.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-
-
-import 'package:zmartrest/bluetooth_permission_handler.dart';
+import 'device_handler.dart';
  
 class DeviceScreen extends StatefulWidget {
   const DeviceScreen({super.key});
@@ -17,8 +14,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
   //static const identifier = 'C36A972B';
   static const identifier = 'E985E828';
 
-  final polar = Polar();
-  final logs = [''];
+  //final polar = Polar();
+  final DeviceHandler deviceHandler = DeviceHandler(identifier: identifier);
+  //final logs = [''];
 
   String currentTab = "connect";
 
@@ -42,24 +40,24 @@ class _DeviceScreenState extends State<DeviceScreen> {
     */
 
     // Add error handlers to all listeners
-    polar.batteryLevel.listen(
-      (e) => log('Battery: ${e.level}'),
-      onError: (error) => log('Battery error: $error')
+    deviceHandler.polar.batteryLevel.listen(
+      (e) => setState(() => deviceHandler.log('Battery: ${e.level}')),
+      onError: (error) => setState(() => deviceHandler.log('Battery error: $error')),
     );
     
-    polar.deviceConnecting.listen(
-      (_) => log('Device connecting'),
-      onError: (error) => log('Connecting error: $error')
+    deviceHandler.polar.deviceConnecting.listen(
+      (_) => setState(() => deviceHandler.log('Device connecting')),
+      onError: (error) => setState(() => deviceHandler.log('Connecting error: $error')),
     );
-    
-    polar.deviceConnected.listen(
-      (_) => log('Device connected'),
-      onError: (error) => log('Connection error: $error')
+
+    deviceHandler.polar.deviceConnected.listen(
+      (_) => setState(() => deviceHandler.log('Device connected')),
+      onError: (error) => setState(() => deviceHandler.log('Connection error: $error')),
     );
-    
-    polar.deviceDisconnected.listen(
-      (_) => log('Device disconnected'),
-      onError: (error) => log('Disconnection error: $error')
+
+    deviceHandler.polar.deviceDisconnected.listen(
+      (_) => setState(() => deviceHandler.log('Device disconnected')),
+      onError: (error) => setState(() => deviceHandler.log('Disconnection error: $error')),
     );
   }
 
@@ -95,19 +93,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       title: const Text('Connect'),
                       description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Connect your device.")),
                       width: MediaQuery.of(context).size.width - 40,
-                      footer: ShadButton(
-                        icon: const ShadImage(LucideIcons.cable),
-                        onPressed: () async {
-                          try {
-                            await BluetoothPermissionHandler.requestBluetoothPermissions();
-                            log('Connecting to device: $identifier');
-                            await polar.connectToDevice(identifier);
-                            streamWhenReady();
-                          } catch (e) {
-                            log('Error connecting to device: $e');
-                          }
+                      footer: ValueListenableBuilder<bool>(
+                        valueListenable: deviceHandler.isConnected,
+                        builder: (context, isConnected, _) {
+                          return ShadButton(
+                            icon: ShadImage(isConnected ? LucideIcons.square : LucideIcons.cable),
+                            onPressed: () async {
+                              if (isConnected) {
+                                await deviceHandler.disconnect();
+                              } else {
+                                await deviceHandler.connect();
+                              }
+                              setState(() {});
+                            },
+                            child: Text(isConnected ? 'Stop' : 'Connect'),
+                          );
                         },
-                        child: const Text('Connect'),
                       ),
                     ),
                     child: const Text('Connect'),
@@ -118,9 +119,19 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       title: const Text('Logs'),
                       description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Logs from device.")),
                       width: MediaQuery.of(context).size.width - 40,
-                      child: Column(
-                        children: logs.reversed.take(10).map(Text.new).toList(),
+                      child: ValueListenableBuilder<List<String>>(
+                        valueListenable: deviceHandler.logs,
+                        builder: (context, logs, _) {
+                          return Column(
+                            children: logs.reversed.take(10).map(Text.new).toList(),
+                          );
+                        },
                       )
+                      /*
+                      child: Column(
+                        children: deviceHandler.logs.reversed.take(10).map(Text.new).toList(),
+                      )
+                      */
                     ),
                     child: Text("Logs"),
                   )
@@ -128,7 +139,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
               ),
               Padding(
                 padding: EdgeInsets.only(top: 60),
-                child: Container(
+                child: SizedBox(
                   width: 320,
                   child: ShadAlert(
                     iconSrc: LucideIcons.bluetooth,
@@ -195,6 +206,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
     );
   }
   */
+
+  /*
  
   void streamWhenReady() async {
     await polar.sdkFeatureReady.firstWhere(
@@ -280,9 +293,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
         break;
     }
   }
+  */
 }
 
 
+/*
 enum RecordingAction {
   start,
   stop,
@@ -291,3 +306,4 @@ enum RecordingAction {
   fetch,
   remove,
 }
+*/

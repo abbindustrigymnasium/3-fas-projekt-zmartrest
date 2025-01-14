@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:polar/polar.dart';
-import 'package:zmartrest/screens/device_handeler';
 
 // Sensor reading models
 class AccelerometerReading {
