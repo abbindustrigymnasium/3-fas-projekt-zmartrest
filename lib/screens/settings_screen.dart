@@ -55,8 +55,8 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             Text('Username: ${userInfo['username'] ?? 'N/A'}'),
                             Text('Email: ${userInfo['email'] ?? 'N/A'}'),
-                            Text('Account created: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(userInfo['created'])) ?? 'N/A'}'),
-                            Text('Last updated: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(userInfo['updated'])) ?? 'N/A'}'),
+                            Text('Account created: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(userInfo['created']))}'),
+                            Text('Last updated: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(userInfo['updated']))}'),
                           ],
                         ),
                       ),

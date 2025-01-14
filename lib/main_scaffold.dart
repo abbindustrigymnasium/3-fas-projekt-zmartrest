@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'pocketbase.dart';
 
-import 'package:zmartrest/screens/device_screen.dart';
+//import 'package:zmartrest/screens/device_screen.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
 import 'package:zmartrest/screens/settings_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
+import 'package:zmartrest/screens/connect_device_screen.dart';
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
