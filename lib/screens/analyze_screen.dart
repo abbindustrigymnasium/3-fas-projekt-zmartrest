@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:zmartrest/widgets/select_user_search.dart';
+import 'package:zmartrest/widgets/select_user.dart';
 import 'package:zmartrest/pocketbase.dart';
 import 'data_visualization_screen.dart';
 
@@ -88,7 +88,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               const SizedBox(height: 10),
-              SelectUserWithSearch(
+              SelectUser(
                 users: users,
                 onUserSelected: widget.onUserSelected, // Just pass through the callback
                 selectedUser: widget.selectedUser,

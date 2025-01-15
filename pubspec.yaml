@@ -38,6 +38,7 @@ dependencies:
   flutter_svg: ^2.0.6
   pocketbase: ^0.20.0
   syncfusion_flutter_charts: ^28.1.38
+  shared_preferences: ^2.3.5
 
 dev_dependencies:
   flutter_test:

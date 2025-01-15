@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'pocketbase.dart';
+import 'package:zmartrest/pocketbase.dart';
 
-//import 'package:zmartrest/screens/device_screen.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
 import 'package:zmartrest/screens/settings_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
@@ -30,6 +29,20 @@ class _MainScaffoldState extends State<MainScaffold> {
   ShadDateTimeRange? _selectedDateRange;
   bool _isLoading = false;
   bool _hasFetchedData = false;
+  String _currentTheme = 'light';
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTheme = widget.currentTheme;  // Set initial theme
+  }
+
+  void _updateTheme(String newTheme) {
+    setState(() {
+      _currentTheme = newTheme;
+    });
+    widget.onThemeChanged(newTheme);  // Propagate theme change up to the parent
+  }
 
   Future<void> _handleDateRangeSelected(ShadDateTimeRange range) async {
     if (_selectedUser == null) return;
@@ -85,8 +98,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> baseScreens = [
       SettingsScreen(
-        onThemeChanged: widget.onThemeChanged, // Pass the callback to SettingsScreen
-        currentTheme: widget.currentTheme,
+        onThemeChanged: _updateTheme,
+        currentTheme: _currentTheme
       ),
       //_getAnalyzeScreen(),
       AnalyzeScreen(
@@ -96,7 +109,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             _hasFetchedData = false;
           });
         },
-        currentTheme: widget.currentTheme,
+        currentTheme: _currentTheme,
         selectedUser: _selectedUser,
         accelerometerData: _accelerometerData,
         heartRateData: _heartRateData,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:zmartrest/widgets/shad_select_theme_widget.dart';
+import 'package:zmartrest/widgets/select_theme.dart';
 import 'package:zmartrest/screens/login_screen.dart';
 import 'package:zmartrest/widgets/confirm_button.dart';
 import 'package:zmartrest/pocketbase.dart';
@@ -12,7 +12,11 @@ class SettingsScreen extends StatelessWidget {
   final Function(String) onThemeChanged;
   final String currentTheme;
 
-  const SettingsScreen({super.key, required this.onThemeChanged, required this.currentTheme});
+  const SettingsScreen({
+    super.key,
+    required this.onThemeChanged,
+    required this.currentTheme
+  });
 
   Future<Map<String, dynamic>?> _getUserInfo() async {
     return await getUserInfo();  // Fetch user info from PocketBase
@@ -129,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ShadSelectThemeWidget(
+                  SelectTheme(
                     onThemeChanged: onThemeChanged,
                     initialValue: currentTheme,
                   ),

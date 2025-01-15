@@ -3,11 +3,11 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/util/app_utils.dart';
 
-class ShadSelectThemeWidget extends StatelessWidget {
+class SelectTheme extends StatelessWidget {
   final ValueChanged<String> onThemeChanged;
   final String initialValue;
 
-  const ShadSelectThemeWidget({
+  const SelectTheme({
     Key? key,
     required this.onThemeChanged,
     required this.initialValue,

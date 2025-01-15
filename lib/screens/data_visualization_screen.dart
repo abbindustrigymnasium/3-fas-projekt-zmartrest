@@ -66,8 +66,9 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
               const CircularProgressIndicator()
             else if (!widget.hasFetchedData)
               const Text('Select a date range to fetch data')
-            else if (widget.hasFetchedData && 
-                    (widget.accelerometerData.isNotEmpty || widget.heartRateData.isNotEmpty))
+            else if (widget.hasFetchedData && widget.accelerometerData.isEmpty && widget.heartRateData.isEmpty)
+              const Text('No data available for the selected date range')
+            else
               Column(
                 children: [
                   // Heart Rate Chart
@@ -238,8 +239,6 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                   ],
                 ],
               )
-            else
-              const Text('Select a date range to view data'),
           ],
         ),
       ),

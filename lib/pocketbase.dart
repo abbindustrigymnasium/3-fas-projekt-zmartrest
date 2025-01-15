@@ -1,9 +1,31 @@
-//Needed things from outside = timestampFrom and timestampTo
-//Functions needs list<map<string, dynamic>>> and returns the same
-
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pocketbase/pocketbase.dart';
 
-final pb = PocketBase('https://zmartrest-pb.superdator.spetsen.net/');
+SharedPreferences? prefs;
+final pb = PocketBase('https://zmartrest-pb.superdator.spetsen.net/', authStore: store);
+
+Future<void> initPrefs() async {
+  debugPrint('Initializing prefs...');
+  prefs = await SharedPreferences.getInstance();
+  debugPrint('Prefs initialized');
+}
+
+final store = AsyncAuthStore(
+  save:    (String data) async => prefs?.setString('pb_auth', data),
+  initial: prefs?.getString('pb_auth'),
+);
+
+Future<ThemeMode> loadThemeFromPrefs() async {
+  final prefs = await SharedPreferences.getInstance();
+  final themeString = prefs.getString('theme') ?? 'light';
+  return themeString == 'dark' ? ThemeMode.dark : ThemeMode.light;
+}
+
+Future<void> saveThemeToPrefs(String theme) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('theme', theme);
+}
 
 authenticateUser(String email, String password) async {
   // Authenticate the user
@@ -12,34 +34,11 @@ authenticateUser(String email, String password) async {
       email,
       password,
     );
+
     final userData = authData.record;
     final userMap = userData.data;
 
-    print('User authenticated:');
-    print('ID: ${userMap['id']}');
-    print('Email: ${userMap['email']}');
-
-    /*
-    // Test data
-    await addHeartrateData(pb, userMap['id'], 1734013490, [80, 10, 850]);
-    await addHeartrateData(pb, userMap['id'], 1734013385, [75, 5, 800]);
-    await addHeartrateData(pb, userMap['id'], 1734013270, [78, 8, 810]);
-    await addHeartrateData(pb, userMap['id'], 1734013150, [82, 12, 870]);
-    await addHeartrateData(pb, userMap['id'], 1734013000, [77, 7, 780]);
-    await addHeartrateData(pb, userMap['id'], 1734012905, [79, 6, 820]);
-    await addHeartrateData(pb, userMap['id'], 1734012780, [83, 9, 860]);
-    await addHeartrateData(pb, userMap['id'], 1734012650, [76, 4, 790]);
-    await addHeartrateData(pb, userMap['id'], 1734012505, [81, 11, 840]);
-    await addHeartrateData(pb, userMap['id'], 1734012390, [74, 3, 770]);
-    await addHeartrateData(pb, userMap['id'], 1734012280, [79, 10, 830]);
-    await addHeartrateData(pb, userMap['id'], 1734012175, [80, 8, 850]);
-    await addHeartrateData(pb, userMap['id'], 1734012050, [76, 6, 780]);
-    await addHeartrateData(pb, userMap['id'], 1734011930, [84, 7, 880]);
-    await addHeartrateData(pb, userMap['id'], 1734011805, [75, 5, 800]);
-    await addHeartrateData(pb, userMap['id'], 1734011690, [81, 9, 840]);
-    await addHeartrateData(pb, userMap['id'], 1734011570, [78, 8, 810]);
-    await addHeartrateData(pb, userMap['id'], 1734011450, [83, 6, 860]);
-    */
+    debugPrint('FULL AUTH DATA: $authData');
 
     // Fetch data with timestamp range
     int timestampFrom = 1734013000;
@@ -53,7 +52,24 @@ authenticateUser(String email, String password) async {
 
     return true;
   } catch (e) {
-    print('Error during authentication: $e');
+    debugPrint('Error during authentication: $e');
+  }
+}
+
+Future<bool> isUserAuthenticated() async {
+  try {
+    final valid = pb.authStore.isValid; // Checks if the session is valid
+
+    if (!valid) {
+      debugPrint('User is not authenticated, needs to be logged in');
+      return false;
+    } else {
+      debugPrint('User is authenticated');
+      return true;
+    }
+  } catch (e) {
+    debugPrint('Error checking session validity: $e');
+    return false;
   }
 }
 
@@ -63,7 +79,7 @@ Future<Map<String, dynamic>?> getUserInfo() async {
     final authData = pb.authStore.record;
 
     if (authData == null) {
-      print('User is not authenticated');
+      debugPrint('User is not authenticated');
       return null;  // Return null if the user is not authenticated
     }
 
@@ -84,18 +100,18 @@ Future<Map<String, dynamic>?> getUserInfo() async {
 
     return userInfo;
   } catch (e) {
-    print('Error fetching user info: $e');
+    debugPrint('Error fetching user info: $e');
     return null;  // Return null in case of error
   }
 }
 
-void logout() {
+void logout() async {
   try {
     // Clear the auth session
     pb.authStore.clear();
-    print('User logged out successfully.');
+    debugPrint('User logged out successfully.');
   } catch (e) {
-    print('Error during logout: $e');
+    debugPrint('Error during logout: $e');
   }
 }
 
@@ -115,12 +131,11 @@ Future<void> addAccelerometerData(
       'user': userId,
     };
 
-    final result =
-        await pb.collection('accelerometer_data').create(body: accelerometerData);
-    print('Accelerometer data added:');
-    print(result.toJson());
+    final result = await pb.collection('accelerometer_data').create(body: accelerometerData);
+    debugPrint('Accelerometer data added:');
+    debugPrint(result.toJson().toString());
   } catch (e) {
-    print('Error adding accelerometer data: $e');
+    debugPrint('Error adding accelerometer data: $e');
   }
 }
 
@@ -142,10 +157,10 @@ Future<void> addHeartrateData(
 
     final result =
         await pb.collection('heart_rate_data').create(body: heartrateData);
-    print('Heart rate data added:');
-    print(result.toJson());
+    debugPrint('Heart rate data added:');
+    debugPrint(result.toJson().toString());
   } catch (e) {
-    print('Error adding heart rate data: $e');
+    debugPrint('Error adding heart rate data: $e');
   }
 }
 
@@ -170,14 +185,14 @@ Future<List<Map<String, dynamic>>> fetchAccelerometerData(
       };
     }).toList();
 
-    print('Fetched accelerometer data within range:');
+    debugPrint('Fetched accelerometer data within range:');
     for (var data in dataList) {
-      print(data);
+      debugPrint(data.toString());
     }
 
     return dataList;
   } catch (e) {
-    print('Failed to fetch accelerometer data: $e');
+    debugPrint('Failed to fetch accelerometer data: $e');
     return [];
   }
 }
@@ -203,21 +218,21 @@ Future<List<Map<String, dynamic>>> fetchHeartrateData(
       };
     }).toList();
 
-    print('Fetched heart rate data within range:');
+    debugPrint('Fetched heart rate data within range:');
     for (var data in dataList) {
-      print(data);
+      debugPrint(data.toString());
     }
 
     return dataList;
   } catch (e) {
-    print('Failed to fetch heart rate data: $e');
+    debugPrint('Failed to fetch heart rate data: $e');
     return [];
   }
 }
 
 // Fetch all data (accelerometer + heart rate) within a timestamp range
 Future fetchAllDataFromTo(PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
-  print('Fetching all data within range...');
+  debugPrint('Fetching all data within range...');
   final accelerometerData =
     await fetchAccelerometerData(pb, userId, timestampFrom, timestampTo);
   final heartrateData =
@@ -227,19 +242,6 @@ Future fetchAllDataFromTo(PocketBase pb, String userId, int timestampFrom, int t
     'accelerometer': accelerometerData,
     'heartrate': heartrateData,
   };
-
-  /*
-  print('Combined data within range:');
-  print('Accelerometer Data:');
-  for (var data in accelerometerData) {
-    print(data);
-  }
-
-  print('Heart Rate Data:');
-  for (var data in heartrateData) {
-    print(data);
-  }
-  */
 }
 
 Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {
@@ -257,10 +259,10 @@ Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {
       };
     }).toList();
 
-    print('Fetched ${users.length} users');
+    debugPrint('Fetched ${users.length} users');
     return users;
   } catch (e) {
-    print('Error fetching users: $e');
+    debugPrint('Error fetching users: $e');
     return []; // Return empty list in case of error
   }
 }

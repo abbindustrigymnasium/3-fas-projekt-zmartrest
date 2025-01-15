@@ -7,7 +7,11 @@ class LoginScreen extends StatefulWidget {
   final Function(String) onThemeChanged; // Accept a callback for theme changes
   final String currentTheme;
 
-  const LoginScreen({super.key, required this.onThemeChanged, required this.currentTheme});
+  const LoginScreen({
+    super.key,
+    required this.onThemeChanged,
+    required this.currentTheme
+  });
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -49,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    //final success = await authenticateUser(email, password);
     final success = await authenticateUser(email, password);
 
     if (success) {

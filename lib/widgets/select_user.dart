@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class SelectUserWithSearch extends StatefulWidget {
+class SelectUser extends StatefulWidget {
   final List<Map<String, dynamic>> users;
   final Function(Map<String, dynamic>) onUserSelected;
   final  Map<String, dynamic>? selectedUser;
 
-  const SelectUserWithSearch({
+  const SelectUser({
     super.key,
     required this.users,
     required this.onUserSelected,
@@ -14,10 +14,10 @@ class SelectUserWithSearch extends StatefulWidget {
   });
 
   @override
-  State<SelectUserWithSearch> createState() => _SelectUserWithSearchState();
+  State<SelectUser> createState() => _SelectUserState();
 }
 
-class _SelectUserWithSearchState extends State<SelectUserWithSearch> {
+class _SelectUserState extends State<SelectUser> {
   String? selectedUserId; // State to track the selected user
   String searchValue = '';
 
@@ -42,7 +42,7 @@ class _SelectUserWithSearchState extends State<SelectUserWithSearch> {
   @override
   Widget build(BuildContext context) {
     return ShadSelect<String>.withSearch(
-      minWidth: MediaQuery.of(context).size.width - 60,
+      minWidth: MediaQuery.of(context).size.width - 50,
       placeholder: const Text('Select'),
       onSearchChanged: (value) => setState(() => searchValue = value),
       searchPlaceholder: const Text('Search by name or email'),

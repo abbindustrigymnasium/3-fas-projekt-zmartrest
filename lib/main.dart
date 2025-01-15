@@ -1,32 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/main_scaffold.dart';
-//import './screens/login_screen.dart';
+import 'package:zmartrest/screens/login_screen.dart';
 
-// Temporary bypass login
-import 'pocketbase.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(const App());
-  // Temporary bypass login
-  authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
+  await initPrefs();
+  final isUserSessionAuthenticated = await isUserAuthenticated();
+
+  final themeMode = await loadThemeFromPrefs();
+
+  runApp(App(isAuthenticated: isUserSessionAuthenticated, themeMode: themeMode));
+  
+  //runApp(const App());
+  //authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
 }
 
 class App extends StatefulWidget {
-  const App({super.key});
+  final bool isAuthenticated; // To start on login screen or main screen
+  final ThemeMode themeMode;
+
+  const App({
+    super.key,
+    required this.isAuthenticated,
+    required this.themeMode
+  });
 
   @override
   State<App> createState() => _AppState();
 }
 
 class _AppState extends State<App> {
-  ThemeMode _themeMode = ThemeMode.light;
+  late ThemeMode _themeMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeMode = widget.themeMode;
+  }
 
   void _setTheme(String theme) {
     setState(() {
       _themeMode = theme == 'dark' ? ThemeMode.dark : ThemeMode.light;
     });
+
+    saveThemeToPrefs(theme);
   }
 
   @override
@@ -47,14 +68,15 @@ class _AppState extends State<App> {
         textTheme: ShadTextTheme(family: 'Inter'),
       ),
       themeMode: _themeMode,
-      home: MainScaffold(
-        onThemeChanged: _setTheme,
-        currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-      ),
-      //home: LoginScreen(
-      //  onThemeChanged: _setTheme,
-      //  currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-      // ),
+      home: widget.isAuthenticated
+        ? MainScaffold(
+            onThemeChanged: _setTheme,
+            currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+          )
+        : LoginScreen(
+            onThemeChanged: _setTheme,
+            currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+          ),
     );
   }
 }

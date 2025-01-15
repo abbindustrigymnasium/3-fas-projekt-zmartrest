@@ -117,7 +117,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                     value: "logs",
                     content: ShadCard(
                       title: const Text('Logs'),
-                      description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Logs from device.")),
+                      description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Logs from device:")),
                       width: MediaQuery.of(context).size.width - 40,
                       child: ValueListenableBuilder<List<String>>(
                         valueListenable: deviceHandler.logs,
@@ -142,7 +142,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 child: SizedBox(
                   width: 320,
                   child: ShadAlert(
-                    iconSrc: LucideIcons.bluetooth,
+                    iconSrc: LucideIcons.bell,
                     description: Text("Make sure bluetooth is enabled on your device."),
                   ),
                 ) 
@@ -150,7 +150,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
             ],
           ),
         )
-        
       ),
     );
   }
