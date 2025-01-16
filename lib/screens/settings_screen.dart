@@ -8,14 +8,21 @@ import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/widgets/zmartrest_logo.dart';
 import 'package:zmartrest/app_constants.dart';
 
+import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/logic.dart';
+
 class SettingsScreen extends StatelessWidget {
   final Function(String) onThemeChanged;
   final String currentTheme;
+  final HealthMonitorSystem healthMonitorSystem;
+  final DeviceHandler deviceHandler;
 
   const SettingsScreen({
     super.key,
     required this.onThemeChanged,
-    required this.currentTheme
+    required this.currentTheme,
+    required this.healthMonitorSystem,
+    required this.deviceHandler,
   });
 
   Future<Map<String, dynamic>?> _getUserInfo() async {
@@ -78,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
                                 logout();
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                    builder: (context) => LoginScreen(onThemeChanged: onThemeChanged, currentTheme: currentTheme),
+                                    builder: (context) => LoginScreen(onThemeChanged: onThemeChanged, currentTheme: currentTheme, healthMonitorSystem: healthMonitorSystem, deviceHandler: deviceHandler),
                                   ),
                                 );
                               },

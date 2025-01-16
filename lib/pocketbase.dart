@@ -152,8 +152,8 @@ Future<void> addHeartrateData(
     final heartrateData = {
       'timestamp': timestamp,
       'hr': heartrateList[0],
-      'hrv': heartrateList[1],
-      'r_r': heartrateList[2],
+      //'hrv': heartrateList[1],
+      //'r_r': heartrateList[2],
       'user': userId
     };
 
@@ -192,7 +192,7 @@ Future<void> addRmssdBaselineData(
   PocketBase pb,
   String userId,
   int timestamp, 
-  double rmssdBaseline
+  double? rmssdBaseline
 ) async {
   try {
     final rmssdBaselineData = {

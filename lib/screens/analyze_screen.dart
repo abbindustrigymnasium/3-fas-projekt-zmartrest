@@ -11,8 +11,8 @@ class AnalyzeScreen extends StatefulWidget {
   final Map<String, dynamic>? selectedUser;
   final List<Map<String, dynamic>> accelerometerData;
   final List<Map<String, dynamic>> heartRateData;
-  final List rmssdData;
-  final List rmssdBaselineData;
+  final List<Map<String, dynamic>> rmssdData;
+  final List<Map<String, dynamic>> rmssdBaselineData;
   final ShadDateTimeRange? selectedDateRange;
   final Function(ShadDateTimeRange) onDateRangeSelected;
   final bool isLoading;

@@ -5,6 +5,9 @@ import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/screens/login_screen.dart';
 
+import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/logic.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -14,9 +17,6 @@ void main() async {
   final themeMode = await loadThemeFromPrefs();
 
   runApp(App(isAuthenticated: isUserSessionAuthenticated, themeMode: themeMode));
-  
-  //runApp(const App());
-  //authenticateUser("alwin.forslund@hitachigymnasiet.se", "Jagälskarspetsen");
 }
 
 class App extends StatefulWidget {
@@ -36,10 +36,67 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   late ThemeMode _themeMode;
 
+  //static const identifier = 'C36A972B';
+  static const identifier = 'E985E828';
+
+  DeviceHandler? deviceHandler;
+  HealthMonitorSystem? healthMonitorSystem;
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _themeMode = widget.themeMode;
+    _initializeDeviceHandler();
+  }
+
+  Future<void> _initializeDeviceHandler() async {
+    try {
+      final userInfo = await getUserInfo(); // Fetch user info
+      final userId = userInfo?['id'];
+
+      if (userId == null) {
+        throw Exception("User ID is null");
+      }
+
+      healthMonitorSystem = HealthMonitorSystem(userId: userId); // Initialize HealthMonitorSystem
+      deviceHandler = DeviceHandler(
+        identifier: identifier,
+        healthMonitorSystem: healthMonitorSystem!,
+      );
+
+      _addDeviceHandlerListeners();
+    } catch (e) {
+      debugPrint("Error initializing DeviceHandler: $e");
+    } finally {
+      setState(() {
+        isLoading = false; // Initialization is complete
+      });
+    }
+  }
+
+  void _addDeviceHandlerListeners() {
+    if (deviceHandler == null) return;
+
+    deviceHandler!.polar.batteryLevel.listen(
+      (e) => setState(() => deviceHandler!.log('Battery: ${e.level}')),
+      onError: (error) => setState(() => deviceHandler!.log('Battery error: $error')),
+    );
+
+    deviceHandler!.polar.deviceConnecting.listen(
+      (_) => setState(() => deviceHandler!.log('Device connecting')),
+      onError: (error) => setState(() => deviceHandler!.log('Connecting error: $error')),
+    );
+
+    deviceHandler!.polar.deviceConnected.listen(
+      (_) => setState(() => deviceHandler!.log('Device connected')),
+      onError: (error) => setState(() => deviceHandler!.log('Connection error: $error')),
+    );
+
+    deviceHandler!.polar.deviceDisconnected.listen(
+      (_) => setState(() => deviceHandler!.log('Device disconnected')),
+      onError: (error) => setState(() => deviceHandler!.log('Disconnection error: $error')),
+    );
   }
 
   void _setTheme(String theme) {
@@ -73,13 +130,16 @@ class _AppState extends State<App> {
           ? MainScaffold(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+              healthMonitorSystem: healthMonitorSystem!,
+              deviceHandler: deviceHandler!,
             )
           : LoginScreen(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+              healthMonitorSystem: healthMonitorSystem!,
+              deviceHandler: deviceHandler!,
             ),
       )
-      
     );
   }
 }

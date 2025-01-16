@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../device_handler.dart';
-import 'package:zmartrest/pocketbase.dart';
 
-//import 'package:zmartrest/logic.dart';
-import 'package:zmartrest/logictwo.dart';
+import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/pocketbase.dart';
+import 'package:zmartrest/logic.dart';
  
 class DeviceScreen extends StatefulWidget {
-  const DeviceScreen({super.key});
+  final HealthMonitorSystem healthMonitorSystem;
+  final DeviceHandler deviceHandler;
+
+  const DeviceScreen({
+    super.key,
+    required this.deviceHandler,
+    required this.healthMonitorSystem,
+  });
 
   @override
   State<DeviceScreen> createState() => _DeviceScreenState();
@@ -15,13 +21,15 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver {
   //static const identifier = 'C36A972B';
-  static const identifier = 'E985E828';
+  // static const identifier = 'E985E828';
 
   String currentTab = "connect";
 
+  /*
   DeviceHandler? deviceHandler;
   HealthMonitorSystem? healthMonitorSystem;
   bool isLoading = true;
+  */
 
   Future<String?> getUserId() async {
     final userInfo = await getUserInfo();
@@ -34,9 +42,10 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initializeDeviceHandler();
+    //_initializeDeviceHandler();
   }
 
+  /*
   Future<void> _initializeDeviceHandler() async {
     try {
       final userInfo = await getUserInfo(); // Fetch user info
@@ -85,29 +94,35 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
       onError: (error) => setState(() => deviceHandler!.log('Disconnection error: $error')),
     );
   }
+  */
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    deviceHandler?.disconnect();
+    //deviceHandler?.disconnect();
     super.dispose();
   }
 
+  /*
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
       _handleAppExit();
     }
   }
-
+  */
+  
+  /*
   Future<void> _handleAppExit() async {
     if (deviceHandler?.isConnected.value == true) {
       await deviceHandler?.disconnect();
     }
   }
+  */
 
   @override
   Widget build(BuildContext context) {
+    /*
     if (isLoading) {
       return Scaffold(
         body: Center(
@@ -123,6 +138,7 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
         ),
       );
     }
+    */
 
     return Scaffold(
       body: Center(
@@ -148,15 +164,15 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
                       description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Connect your device.")),
                       width: MediaQuery.of(context).size.width - 40,
                       footer: ValueListenableBuilder<bool>(
-                        valueListenable: deviceHandler!.isConnected,
+                        valueListenable: widget.deviceHandler.isConnected,
                         builder: (context, isConnected, _) {
                           return ShadButton(
                             icon: ShadImage(isConnected ? LucideIcons.square : LucideIcons.cable),
                             onPressed: () async {
                               if (isConnected) {
-                                await deviceHandler!.disconnect();
+                                await widget.deviceHandler.disconnect();
                               } else {
-                                await deviceHandler!.connect();
+                                await widget.deviceHandler.connect();
                               }
                               setState(() {});
                             },
@@ -174,7 +190,7 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
                       description: const Padding(padding: EdgeInsets.only(bottom: 20), child: Text("Logs from device:")),
                       width: MediaQuery.of(context).size.width - 40,
                       child: ValueListenableBuilder<List<String>>(
-                        valueListenable: deviceHandler!.logs,
+                        valueListenable: widget.deviceHandler.logs,
                         builder: (context, logs, _) {
                           return Column(
                             children: logs.reversed.take(10).map(Text.new).toList(),

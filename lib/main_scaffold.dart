@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:zmartrest/pocketbase.dart';
 
+import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/screens/analyze_screen.dart';
 import 'package:zmartrest/screens/settings_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
 import 'package:zmartrest/screens/connect_device_screen.dart';
+import 'package:zmartrest/logic.dart';
+import 'package:zmartrest/device_handler.dart';
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
   final String currentTheme;
 
+  final HealthMonitorSystem healthMonitorSystem;
+  final DeviceHandler deviceHandler;
+
   const MainScaffold({
     super.key,
     required this.onThemeChanged,
-    required this.currentTheme
+    required this.currentTheme,
+    required this.healthMonitorSystem,
+    required this.deviceHandler,
   });
 
   @override
@@ -26,8 +33,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   Map<String, dynamic>? _selectedUser;
   List<Map<String, dynamic>> _accelerometerData = [];
   List<Map<String, dynamic>> _heartRateData = [];
-  List _rmssdData = [];
-  List _rmssdBaselineData = [];
+  List<Map<String, dynamic>> _rmssdData = [];
+  List<Map<String, dynamic>> _rmssdBaselineData = [];
   ShadDateTimeRange? _selectedDateRange;
   bool _isLoading = false;
   bool _hasFetchedData = false;
@@ -37,6 +44,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   void initState() {
     super.initState();
     _currentTheme = widget.currentTheme;  // Set initial theme
+
+    _listenToRealTimeData(widget.healthMonitorSystem);
   }
 
   void _updateTheme(String newTheme) {
@@ -86,6 +95,40 @@ class _MainScaffoldState extends State<MainScaffold> {
     }
   }
 
+  void _listenToRealTimeData(HealthMonitorSystem healthMonitorSystem) {
+  healthMonitorSystem.heartRateStream.listen((data) {
+    setState(() {
+      _heartRateData.add(data.toJson());
+    });
+  });
+
+  healthMonitorSystem.accelerometerStream.listen((data) {
+    setState(() {
+      _accelerometerData.add(data.toJson());
+    });
+  });
+
+  healthMonitorSystem.rmssdStream.listen((data) {
+    setState(() {
+      _rmssdData.add(data.toJson());
+    });
+  });
+
+  healthMonitorSystem.baselineStream.listen((data) {
+    setState(() {
+      _rmssdBaselineData.add(data.toJson());
+    });
+  });
+
+  /*
+  healthMonitorSystem.baselineStream.listen((baseline) {
+    setState(() {
+      _rmssdBaselineData.add({'timestamp': DateTime.now().millisecondsSinceEpoch ~/ 1000, 'baseline': baseline});
+    });
+  });
+  */
+}
+
   /*
   Widget _getAnalyzeScreen() {
     if (_selectedUser == null) {
@@ -107,7 +150,9 @@ class _MainScaffoldState extends State<MainScaffold> {
     final List<Widget> baseScreens = [
       SettingsScreen(
         onThemeChanged: _updateTheme,
-        currentTheme: _currentTheme
+        currentTheme: _currentTheme,
+        healthMonitorSystem: widget.healthMonitorSystem,
+        deviceHandler: widget.deviceHandler,
       ),
       //_getAnalyzeScreen(),
       AnalyzeScreen(
@@ -128,7 +173,10 @@ class _MainScaffoldState extends State<MainScaffold> {
         isLoading: _isLoading,
         hasFetchedData: _hasFetchedData,
       ),
-      const DeviceScreen(),
+      DeviceScreen(
+        deviceHandler: widget.deviceHandler,
+        healthMonitorSystem: widget.healthMonitorSystem,
+      ),
     ];
 
     return Scaffold(

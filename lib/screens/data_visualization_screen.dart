@@ -7,8 +7,8 @@ class DataVisualizationScreen extends StatefulWidget {
   final String currentTheme;
   final List<Map<String, dynamic>> accelerometerData;
   final List<Map<String, dynamic>> heartRateData;
-  final List rmssdData;
-  final List rmssdBaselineData;
+  final List<Map<String, dynamic>> rmssdData;
+  final List<Map<String, dynamic>> rmssdBaselineData;
   final ShadDateTimeRange? selectedDateRange;
   final Function(ShadDateTimeRange range) onDateRangeSelected;
   final bool isLoading;
@@ -89,6 +89,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       height: 300,
                       child: SfCartesianChart(
                         tooltipBehavior: TooltipBehavior(enable: true),
+                        trackballBehavior: TrackballBehavior(
+                          enable: true,
+                          activationMode: ActivationMode.singleTap,
+                          tooltipSettings: InteractiveTooltip(format: 'point.y BPM'),
+                        ),
                         primaryXAxis: DateTimeCategoryAxis(
                           intervalType: DateTimeIntervalType.hours,
                           dateFormat: DateFormat('HH:mm'),
@@ -121,7 +126,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.redAccent,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true,
+                              //isVisible: true,
+                              isVisible: false,
                               shape: DataMarkerType.circle,
                               color: widget.currentTheme == 'light' 
                                   ? Colors.white 
@@ -150,6 +156,10 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       height: 300,
                       child: SfCartesianChart(
                         tooltipBehavior: TooltipBehavior(enable: true),
+                        trackballBehavior: TrackballBehavior(
+                          enable: true,
+                          activationMode: ActivationMode.singleTap,
+                        ),
                         primaryXAxis: DateTimeCategoryAxis(
                           intervalType: DateTimeIntervalType.hours,
                           dateFormat: DateFormat('HH:mm'),
@@ -171,7 +181,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.blue,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true,
+                              //isVisible: true,
+                              isVisible: false,
                               shape: DataMarkerType.circle,
                               color: widget.currentTheme == 'light' 
                                   ? Colors.white 
@@ -192,7 +203,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.green,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true,
+                              //isVisible: true,
+                              isVisible: false,
                               shape: DataMarkerType.circle,
                               color: widget.currentTheme == 'light' 
                                   ? Colors.white 
@@ -213,7 +225,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.orange,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true,
+                              //isVisible: true,
+                              isVisible: false,
                               shape: DataMarkerType.circle,
                               color: widget.currentTheme == 'light' 
                                   ? Colors.white 
@@ -255,6 +268,10 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       height: 300,
                       child: SfCartesianChart(
                         tooltipBehavior: TooltipBehavior(enable: true),
+                        trackballBehavior: TrackballBehavior(
+                          enable: true,
+                          activationMode: ActivationMode.singleTap,
+                        ),
                         primaryXAxis: DateTimeCategoryAxis(
                           intervalType: DateTimeIntervalType.hours,
                           dateFormat: DateFormat('HH:mm'),
@@ -275,7 +292,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                             color: Colors.deepPurpleAccent,
                             enableTooltip: true,
                             markerSettings: MarkerSettings(
-                              isVisible: true,
+                              //isVisible: true,
+                              isVisible: false,
                               shape: DataMarkerType.circle,
                               color: widget.currentTheme == 'light' 
                                   ? Colors.white 
@@ -291,11 +309,12 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
                               yValueMapper: (data, _) =>
-                                  (data['rmssdBaseline'] as num).toDouble(),
+                                  (data['rmssd_baseline'] as num).toDouble(),
                               color: Colors.deepOrangeAccent,
                               enableTooltip: true,
                               markerSettings: MarkerSettings(
-                                isVisible: true,
+                                //isVisible: true,
+                                isVisible: false,
                                 shape: DataMarkerType.circle,
                                 color: widget.currentTheme == 'light' 
                                     ? Colors.white 
@@ -313,7 +332,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _LegendItem(color: Colors.deepOrangeAccent, label: 'RMSSD Baseline'),
+                          _LegendItem(color: Colors.deepOrangeAccent, label: 'Baseline'),
                           SizedBox(width: 16),
                           _LegendItem(color: Colors.deepPurpleAccent, label: 'RMSSD'),
                         ],

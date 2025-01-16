@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:pocketbase/pocketbase.dart';
-import 'package:polar/polar.dart';
 
-// Sensor reading models
+import 'package:zmartrest/pocketbase.dart';
+
+// Motion state enum
+enum MotionState {
+  normal,
+  exercising
+}
+
 class AccelerometerReading {
   final int timestamp;
   final double x, y, z;
@@ -25,128 +31,86 @@ class AccelerometerReading {
 
 class HeartRateReading {
   final int timestamp;
-  final double hr, hrv, rR;
+  final int hr;
 
   HeartRateReading({
     required this.timestamp,
     required this.hr,
-    required this.hrv,
-    required this.rR,
   });
 
   Map<String, dynamic> toJson() => {
     'timestamp': timestamp,
     'hr': hr,
-    'hrv': hrv,
-    'r_r': rR,
+  };
+}
+
+class RMSSDData {
+  final int timestamp;
+  final double rmssd;
+
+  RMSSDData({
+    required this.timestamp,
+    required this.rmssd,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'timestamp': timestamp,
+    'rmssd': rmssd,
+  };
+}
+
+class RMSSDBaselineData {
+  final int timestamp;
+  final double? rmssdBaseline;
+
+  RMSSDBaselineData({
+    required this.timestamp,
+    required this.rmssdBaseline,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'timestamp': timestamp,
+    'rmssd_baseline': rmssdBaseline,
   };
 }
 
 class HealthMonitorSystem {
-  final PocketBase pb;
   final String userId;
-  final Polar polar;
-  final String polarIdentifier;
   
-  // Stream controllers for real-time data
+  // Motion state monitoring
+  final _motionStateController = StreamController<MotionState>.broadcast();
+  final List<AccelerometerReading> _activityBuffer = [];
+  final int _activityWindowSize = 50; // About 1 second of data at 52Hz
+  final double _exerciseThreshold = 1000.0; // mG threshold for exercise detection
+  
+  // Stream controllers for sensor data
   final _accelerometerController = StreamController<AccelerometerReading>.broadcast();
   final _heartRateController = StreamController<HeartRateReading>.broadcast();
+  final _rmssdController = StreamController<RMSSDData>.broadcast();
+  final _rmssdBaselineController = StreamController<RMSSDBaselineData>.broadcast();
   
-  // Buffers for batch processing
+  // Data buffers
   final List<AccelerometerReading> _accelerometerBuffer = [];
   final List<HeartRateReading> _heartRateBuffer = [];
-  final int _bufferSize = 10;
+  final List<RMSSDData> _rmssdBuffer = [];
+  final List<RMSSDBaselineData> _rmssdBaselineBuffer = [];
+  //final int _bufferSize = 10; // Max buffer size
 
-  // Stream subscriptions
-  StreamSubscription? _hrSubscription;
-  StreamSubscription? _accSubscription;
-  StreamSubscription? _ecgSubscription;
+  double? _rmssdBaseline;
+  //final _baselineWindow = <double>[];
 
-  // Getters for the streams
+  // Getters for streams
+  Stream<MotionState> get motionStateStream => _motionStateController.stream;
   Stream<AccelerometerReading> get accelerometerStream => _accelerometerController.stream;
   Stream<HeartRateReading> get heartRateStream => _heartRateController.stream;
+  Stream<RMSSDData> get rmssdStream => _rmssdController.stream;
+  Stream<RMSSDBaselineData> get baselineStream => _rmssdBaselineController.stream;
 
-  HealthMonitorSystem({
-    required this.pb,
-    required this.userId,
-    required this.polar,
-    required this.polarIdentifier,
-  });
+  HealthMonitorSystem({required this.userId});
 
-  // Initialize connection to Polar device
-  Future<void> initializePolarDevice() async {
-    try {
-      await polar.connectToDevice(polarIdentifier);
-      await _setupStreams();
-    } catch (e) {
-      debugPrint('Error initializing Polar device: $e');
-      rethrow;
-    }
-  }
-
-  // Set up Polar data streams
-  Future<void> _setupStreams() async {
-    try {
-      // Wait for SDK to be ready
-      await polar.sdkFeatureReady.firstWhere(
-        (e) =>
-            e.identifier == polarIdentifier &&
-            e.feature == PolarSdkFeature.onlineStreaming,
-      );
-
-      // Get available data types
-      final availableTypes = await polar.getAvailableOnlineStreamDataTypes(polarIdentifier);
-      debugPrint('Available Polar data types: $availableTypes');
-
-      // Set up heart rate streaming
-      if (availableTypes.contains(PolarDataType.hr)) {
-        _hrSubscription = polar.startHrStreaming(polarIdentifier).listen(
-          (PolarHrData data) {
-            if (data.samples.isNotEmpty) {
-              final hrValue = data.samples.first;
-              processHeartRateData(
-                double.parse(hrValue.toString()),  // Heart rate value
-                0.0,  // HRV placeholder
-                0.0,  // R-R placeholder
-              );
-              debugPrint('HR data received: $hrValue');
-            }
-          },
-          onError: (error) {
-            debugPrint('Heart rate stream error: $error');
-          },
-        );
-      }
-
-      // Set up accelerometer streaming
-      if (availableTypes.contains(PolarDataType.acc)) {
-        _accSubscription = polar.startAccStreaming(polarIdentifier).listen(
-          (PolarAccData data) {
-            if (data.samples.isNotEmpty) {
-              final sample = data.samples.first;
-              processAccelerometerData(
-                sample.x.toDouble(),
-                sample.y.toDouble(),
-                sample.z.toDouble(),
-              );
-            }
-            debugPrint('ACC data received');
-          },
-          onError: (error) {
-            debugPrint('Accelerometer stream error: $error');
-          },
-        );
-      }
-    } catch (e) {
-      debugPrint('Error setting up Polar streams: $e');
-      rethrow;
-    }
-  }
-
-  // Process accelerometer data
-  void processAccelerometerData(double x, double y, double z) {
+  void processAccelerometerData(int timestamp, double x, double y, double z) {
     final reading = AccelerometerReading(
-      timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      timestamp: timestamp,
       x: x,
       y: y,
       z: z,
@@ -154,86 +118,152 @@ class HealthMonitorSystem {
     
     _accelerometerController.add(reading);
     _accelerometerBuffer.add(reading);
+    _activityBuffer.add(reading);
     
+    // Detect motion state when we have enough data
+    if (_activityBuffer.length >= _activityWindowSize) {
+      _detectMotionState();
+      _activityBuffer.removeAt(0);
+    }
+    
+    /*
     if (_accelerometerBuffer.length >= _bufferSize) {
       _sendAccelerometerBuffer();
     }
+    */
   }
 
-  // Process heart rate data
-  void processHeartRateData(double hr, double hrv, double rR) {
+  void processHeartRateData(int hr) {
     final reading = HeartRateReading(
       timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       hr: hr,
-      hrv: hrv,
-      rR: rR,
     );
     
     _heartRateController.add(reading);
     _heartRateBuffer.add(reading);
     
+    /*
     if (_heartRateBuffer.length >= _bufferSize) {
       _sendHeartRateBuffer();
     }
+    */
   }
 
-  // Add accelerometer data to PocketBase
-  Future<void> addAccelerometerData(
-    List<double> accelerometerList,
-    int timestamp,
-  ) async {
-    try {
-      final accelerometerData = {
-        'timestamp': timestamp,
-        'x': accelerometerList[0],
-        'y': accelerometerList[1],
-        'z': accelerometerList[2],
-        'user': userId,
-      };
+  // Reference: https://www.kubios.com/blog/hrv-analysis-methods/
+  double calculateRmssd(List<double> rrIntervals) {
+    if (rrIntervals.length < 2) {
+      throw ArgumentError('At least two RR intervals are required to calculate RMSSD.');
+    }
 
-      final result = await pb.collection('accelerometer_data').create(
-        body: accelerometerData,
-      );
-      debugPrint('Accelerometer data added: ${result.toJson()}');
-    } catch (e) {
-      debugPrint('Error adding accelerometer data: $e');
-      rethrow;
+    double sumOfSquares = 0.0;
+
+    for (int i = 0; i < rrIntervals.length - 1; i++) {
+      final difference = rrIntervals[i + 1] - rrIntervals[i];
+      sumOfSquares += pow(difference, 2);
+    }
+
+    final rmssd = sqrt(sumOfSquares / (rrIntervals.length - 1));
+    return rmssd;
+  }
+
+  void processRmssdData(double rmssd) {
+    final reading = RMSSDData(
+      timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      rmssd: rmssd,
+    );
+
+    _rmssdController.add(reading);
+    _rmssdBuffer.add(reading);
+
+    /*
+    if (_rmssdBuffer.length >= _bufferSize) {
+      _sendRmssdBuffer();
+    }
+    */
+
+    // Update baseline only during normal state
+    /*
+    if (_motionStateController.hasListener && 
+        _motionStateController.stream.last == MotionState.normal) {
+      _updateBaselineRmssd(rmssd);
+    }
+    */
+
+    
+    if (_motionStateController.hasListener) {
+      _updateBaselineRmssd(rmssd);
+    }
+    
+  }
+
+  /*
+  void _updateBaselineRmssd(double rmssd) {
+    _baselineWindow.add(rmssd);
+    if (_baselineWindow.length > 60) { // Keep last minute
+      _baselineWindow.removeAt(0);
+      _rmssdBaseline = _baselineWindow.reduce((a, b) => a + b) / _baselineWindow.length;
     }
   }
+  */
 
-  // Add heart rate data to PocketBase
-  Future<void> addHeartrateData(
-    List<double> heartrateList,
-    int timestamp,
-  ) async {
-    try {
-      final heartrateData = {
-        'timestamp': timestamp,
-        'hr': heartrateList[0],
-        'hrv': heartrateList[1],
-        'r_r': heartrateList[2],
-        'user': userId,
-      };
-
-      final result = await pb.collection('heart_rate_data').create(
-        body: heartrateData,
-      );
-      debugPrint('Heart rate data added: ${result.toJson()}');
-    } catch (e) {
-      debugPrint('Error adding heart rate data: $e');
-      rethrow;
+  void _updateBaselineRmssd(double rmssd) {
+    if (_rmssdBaseline == null) {
+      _rmssdBaseline = rmssd;
+    } else {
+      // Smoothing factor of 0.1 for gradual updates
+      _rmssdBaseline = (_rmssdBaseline! * 0.9) + (rmssd * 0.1);
     }
+
+    final calculation = RMSSDBaselineData(
+      timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      rmssdBaseline: _rmssdBaseline,
+    );
+
+    debugPrint("RMSSD baseline: $calculation");
+
+    _rmssdBaselineController.add(calculation);
+    _rmssdBaselineBuffer.add(calculation);
+
+    /*
+    if (_rmssdBaselineBuffer.length >= _bufferSize) {
+      _sendRmssdBaselineBuffer();
+    }
+    */
   }
 
-  // Send accelerometer buffer to backend
+  void _detectMotionState() {
+    if (_activityBuffer.isEmpty) return;
+
+    // Calculate average magnitude of acceleration over the window
+    double totalMagnitude = 0;
+    
+    for (var reading in _activityBuffer) {
+      // Calculate magnitude of acceleration in mG
+      double magnitude = sqrt(pow(reading.x, 2) + pow(reading.y, 2) + pow(reading.z, 2));
+      totalMagnitude += magnitude;
+    }
+    
+    double avgMagnitude = totalMagnitude / _activityBuffer.length;
+    
+    // Determine motion state based on average magnitude
+    // If average magnitude is above threshold, consider it exercise
+    MotionState currentState = avgMagnitude > _exerciseThreshold 
+        ? MotionState.exercising 
+        : MotionState.normal;
+    
+    _motionStateController.add(currentState);
+  }
+
   Future<void> _sendAccelerometerBuffer() async {
     if (_accelerometerBuffer.isEmpty) return;
 
     try {
       final List<Future<void>> futures = _accelerometerBuffer.map((reading) {
         return addAccelerometerData(
-          [reading.x, reading.y, reading.z],
+          pb,
+          userId,
           reading.timestamp,
+          [reading.x, reading.y, reading.z],
         );
       }).toList();
 
@@ -244,15 +274,16 @@ class HealthMonitorSystem {
     }
   }
 
-  // Send heart rate buffer to backend
   Future<void> _sendHeartRateBuffer() async {
     if (_heartRateBuffer.isEmpty) return;
 
     try {
       final List<Future<void>> futures = _heartRateBuffer.map((reading) {
         return addHeartrateData(
-          [reading.hr, reading.hrv, reading.rR],
+          pb,
+          userId,
           reading.timestamp,
+          [reading.hr],
         );
       }).toList();
 
@@ -263,144 +294,52 @@ class HealthMonitorSystem {
     }
   }
 
-  // Fetch accelerometer data
-  Future<List<Map<String, dynamic>>> fetchAccelerometerData(
-    int timestampFrom,
-    int timestampTo,
-  ) async {
-    try {
-      final result = await pb.collection('accelerometer_data').getList(
-        page: 1,
-        perPage: 50,
-        filter:
-            'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
-      );
+  Future<void> _sendRmssdBuffer() async {
+    if (_rmssdBuffer.isEmpty) return;
 
-      return result.items.map((record) {
-        return {
-          'timestamp': record.data['timestamp'],
-          'x': record.data['x'],
-          'y': record.data['y'],
-          'z': record.data['z'],
-          'user': record.data['user'],
-        };
+    try {
+      final List<Future<void>> futures = _rmssdBuffer.map((reading) {
+        return addRmssdData(pb, userId, reading.timestamp, reading.rmssd);
       }).toList();
+
+      await Future.wait(futures);
+      _rmssdBuffer.clear();
     } catch (e) {
-      debugPrint('Failed to fetch accelerometer data: $e');
-      return [];
+      debugPrint('Error sending rmssd buffer: $e');
     }
   }
 
-  // Fetch heart rate data
-  Future<List<Map<String, dynamic>>> fetchHeartrateData(
-    int timestampFrom,
-    int timestampTo,
-  ) async {
-    try {
-      final result = await pb.collection('heart_rate_data').getList(
-        page: 1,
-        perPage: 50,
-        filter:
-            'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
-      );
+  Future<void> _sendRmssdBaselineBuffer() async {
+    if (_rmssdBaselineBuffer.isEmpty) return;
 
-      return result.items.map((record) {
-        return {
-          'timestamp': record.data['timestamp'],
-          'hr': record.data['hr'],
-          'hrv': record.data['hrv'],
-          'r_r': record.data['r_r'],
-          'user': record.data['user'],
-        };
+    try {
+      final List<Future<void>> futures = _rmssdBaselineBuffer.map((reading) {
+        debugPrint('Sending baseline reading: ${reading.rmssdBaseline}');
+        return addRmssdBaselineData(pb, userId, reading.timestamp, reading.rmssdBaseline);
       }).toList();
+
+      await Future.wait(futures);
+      _rmssdBuffer.clear();
     } catch (e) {
-      debugPrint('Failed to fetch heart rate data: $e');
-      return [];
+      debugPrint('Error sending rmssd buffer: $e');
     }
   }
 
-  // Fetch historical data
-  Future<Map<String, List<Map<String, dynamic>>>> getHistoricalData(
-    int timestampFrom,
-    int timestampTo,
-  ) async {
-    try {
-      final accelerometerFuture = fetchAccelerometerData(timestampFrom, timestampTo);
-      final heartRateFuture = fetchHeartrateData(timestampFrom, timestampTo);
-
-      final results = await Future.wait([accelerometerFuture, heartRateFuture]);
-
-      return {
-        'accelerometer': results[0],
-        'heartRate': results[1],
-      };
-    } catch (e) {
-      debugPrint('Error fetching historical data: $e');
-      return {
-        'accelerometer': [],
-        'heartRate': [],
-      };
-    }
-  }
-
-  // Force send any remaining buffered data
   Future<void> flushBuffers() async {
     await Future.wait([
       _sendAccelerometerBuffer(),
       _sendHeartRateBuffer(),
+      _sendRmssdBuffer(),
+      _sendRmssdBaselineBuffer()
     ]);
   }
 
-  // Clean up resources
   Future<void> dispose() async {
-    await Future.wait([
-      _hrSubscription?.cancel() ?? Future.value(),
-      _accSubscription?.cancel() ?? Future.value(),
-      _ecgSubscription?.cancel() ?? Future.value(),
-    ]);
-    
     await flushBuffers();
-    _accelerometerController.close();
-    _heartRateController.close();
-  }
-}
-
-
-// Example usage
-void main() async {
-  final pb = PocketBase('https://your-pocketbase-url.com');
-  
-  final healthMonitor = HealthMonitorSystem(
-    pb: pb,
-    userId: 'current_user_id',
-    polar: Polar(),
-    polarIdentifier: 'C36A972B',
-  );
-
-  try {
-    await healthMonitor.initializePolarDevice();
-    
-    // Listen to heart rate updates
-    healthMonitor.heartRateStream.listen((reading) {
-      debugPrint('Heart Rate: ${reading.hr}');
-    });
-
-    // Listen to accelerometer updates
-    healthMonitor.accelerometerStream.listen((reading) {
-      debugPrint('Acceleration: (${reading.x}, ${reading.y}, ${reading.z})');
-    });
-
-    // Example of fetching historical data
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final oneHourAgo = now - (60 * 60);
-    
-    final historicalData = await healthMonitor.getHistoricalData(
-      oneHourAgo,
-      now,
-    );
-    
-    debugPrint('Historical data: $historicalData');
-  } catch (e) {
-    debugPrint('Error in health monitoring: $e');
+    await _motionStateController.close();
+    await _accelerometerController.close();
+    await _heartRateController.close();
+    await _rmssdController.close();
+    await _rmssdBaselineController.close();
   }
 }

@@ -3,14 +3,15 @@ import 'package:polar/polar.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:zmartrest/bluetooth_permission_handler.dart';
-import 'package:zmartrest/logictwo.dart';
-//import 'package:zmartrest/logic.dart';
+import 'package:zmartrest/logic.dart';
 
 class DeviceHandler {
   final polar = Polar();
   final String identifier;
   final ValueNotifier<List<String>> logs = ValueNotifier<List<String>>([]);
   final ValueNotifier<bool> isConnected = ValueNotifier<bool>(false);
+
+  List<double> rrIntervals = [];
 
   final HealthMonitorSystem healthMonitorSystem;
   Timer? _uploadTimer; // Timer for periodic pocketbase uploads
@@ -68,25 +69,31 @@ class DeviceHandler {
 
       // Start streaming data
       if (availableTypes.contains(PolarDataType.hr)) {
-        polar.startHrStreaming(identifier).listen((data) async {
-          log('Heart rate: ${data.samples.map((data) => data.hr)}');
+        polar.startHrStreaming(identifier).listen((data) {
+          //log('Heart rate: ${data.samples.map((data) => data.hr)}');
           
           final hrSample = data.samples.first;
+          log('Heart rate: ${hrSample.hr}');
+          healthMonitorSystem.processHeartRateData(hrSample.hr);
 
-          healthMonitorSystem.processHeartRateData(hrSample.hr.toDouble());
+          //log('Heart rate: ${hrSample.hr}');
 
+          // debugPrint('RR: ${hrSample.rrsMs}');
+
+          /*
           // Extract RR intervals and calculate RMSSD
           final rrIntervals = hrSample.rrsMs.map((e) => e.toDouble()).toList();
           if (rrIntervals.isNotEmpty) {
             final rmssd = healthMonitorSystem.calculateRmssd(rrIntervals);
             healthMonitorSystem.processRmssdData(rmssd);
           }
+          */
         });
       }
 
       if (availableTypes.contains(PolarDataType.acc)) {
         polar.startAccStreaming(identifier).listen((data) {
-          log('Accelerometer data: ${data.samples}');
+          //log('Accelerometer data: ${data.samples}');
 
           final accSample = data.samples.first;
           final timeStamp = accSample.timeStamp;
@@ -98,6 +105,23 @@ class DeviceHandler {
             data.samples.first.y.toDouble(),
             data.samples.first.z.toDouble()
           );
+        });
+      }
+
+      if (availableTypes.contains(PolarDataType.ppi)) {
+        polar.startPpiStreaming(identifier).listen((data) {
+          //log('PPI data: ${data.samples}');
+
+          final ppiSample = data.samples.first;
+
+          log('PPI: ${ppiSample.ppi}');
+
+          //final rrIntervals = hrSample.rrsMs.map((e) => e.toDouble()).toList();
+          rrIntervals += [ppiSample.ppi.toDouble()];
+          if (rrIntervals.isNotEmpty) {
+            final rmssd = healthMonitorSystem.calculateRmssd(rrIntervals);
+            healthMonitorSystem.processRmssdData(rmssd);
+          }
         });
       }
 
