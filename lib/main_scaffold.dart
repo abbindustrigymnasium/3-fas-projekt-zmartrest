@@ -26,6 +26,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   Map<String, dynamic>? _selectedUser;
   List<Map<String, dynamic>> _accelerometerData = [];
   List<Map<String, dynamic>> _heartRateData = [];
+  List _rmssdData = [];
+  List _rmssdBaselineData = [];
   ShadDateTimeRange? _selectedDateRange;
   bool _isLoading = false;
   bool _hasFetchedData = false;
@@ -52,8 +54,9 @@ class _MainScaffoldState extends State<MainScaffold> {
       _selectedDateRange = range;
     });
 
+    // Fetch data for selected date range
     try {
-      final allData = await fetchAllDataFromTo(
+      final data = await fetchAllDataFromTo(
         pb,
         _selectedUser!['id'],
         range.start!.millisecondsSinceEpoch ~/ 1000,
@@ -61,8 +64,10 @@ class _MainScaffoldState extends State<MainScaffold> {
       );
 
       setState(() {
-        _accelerometerData = allData['accelerometer'] ?? [];
-        _heartRateData = allData['heartrate'] ?? [];
+        _accelerometerData = data['accelerometer'] ?? [];
+        _heartRateData = data['heartrate'] ?? [];
+        _rmssdData = data['rmssd'] ?? [];
+        _rmssdBaselineData = data['rmssd_baseline'];
         _isLoading = false;
         _hasFetchedData = true;
       });
@@ -70,11 +75,14 @@ class _MainScaffoldState extends State<MainScaffold> {
       setState(() {
         _isLoading = false;
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error fetching data: $e')),
         );
       }
+
+      debugPrint(e.toString());
     }
   }
 
@@ -113,6 +121,8 @@ class _MainScaffoldState extends State<MainScaffold> {
         selectedUser: _selectedUser,
         accelerometerData: _accelerometerData,
         heartRateData: _heartRateData,
+        rmssdData: _rmssdData,
+        rmssdBaselineData: _rmssdBaselineData,
         selectedDateRange: _selectedDateRange,
         onDateRangeSelected: _handleDateRangeSelected,
         isLoading: _isLoading,

@@ -68,15 +68,18 @@ class _AppState extends State<App> {
         textTheme: ShadTextTheme(family: 'Inter'),
       ),
       themeMode: _themeMode,
-      home: widget.isAuthenticated
-        ? MainScaffold(
-            onThemeChanged: _setTheme,
-            currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-          )
-        : LoginScreen(
-            onThemeChanged: _setTheme,
-            currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-          ),
+      home: ScaffoldMessenger(
+        child: widget.isAuthenticated
+          ? MainScaffold(
+              onThemeChanged: _setTheme,
+              currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+            )
+          : LoginScreen(
+              onThemeChanged: _setTheme,
+              currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
+            ),
+      )
+      
     );
   }
 }

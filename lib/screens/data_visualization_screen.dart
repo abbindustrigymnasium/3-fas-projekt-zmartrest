@@ -7,6 +7,8 @@ class DataVisualizationScreen extends StatefulWidget {
   final String currentTheme;
   final List<Map<String, dynamic>> accelerometerData;
   final List<Map<String, dynamic>> heartRateData;
+  final List rmssdData;
+  final List rmssdBaselineData;
   final ShadDateTimeRange? selectedDateRange;
   final Function(ShadDateTimeRange range) onDateRangeSelected;
   final bool isLoading;
@@ -18,6 +20,8 @@ class DataVisualizationScreen extends StatefulWidget {
     required this.currentTheme,
     required this.accelerometerData,
     required this.heartRateData,
+    required this.rmssdData,
+    required this.rmssdBaselineData,
     this.selectedDateRange,
     required this.onDateRangeSelected,
     required this.isLoading,
@@ -74,7 +78,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                   // Heart Rate Chart
                   if (widget.heartRateData.isNotEmpty) ...[
                     const Text(
-                      'Heart Rate Data',
+                      'Heart Rate',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -82,7 +86,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
-                      height: 200,
+                      height: 300,
                       child: SfCartesianChart(
                         tooltipBehavior: TooltipBehavior(enable: true),
                         primaryXAxis: DateTimeCategoryAxis(
@@ -131,11 +135,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 60),
                   // Accelerometer Chart
                   if (widget.accelerometerData.isNotEmpty) ...[
                     const Text(
-                      'Accelerometer Data',
+                      'Accelerometer',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -237,6 +241,85 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 60),
+                  if (widget.rmssdData.isNotEmpty) ...[
+                    const Text(
+                      'RMSSD',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 300,
+                      child: SfCartesianChart(
+                        tooltipBehavior: TooltipBehavior(enable: true),
+                        primaryXAxis: DateTimeCategoryAxis(
+                          intervalType: DateTimeIntervalType.hours,
+                          dateFormat: DateFormat('HH:mm'),
+                          majorGridLines: const MajorGridLines(width: 0),
+                        ),
+                        primaryYAxis: NumericAxis(
+                          majorGridLines: const MajorGridLines(width: 0),
+                        ),
+                        plotAreaBorderWidth: 0,
+                        series: <CartesianSeries<dynamic, dynamic>>[
+                          SplineSeries(
+                            dataSource: widget.rmssdData, // TODO: CHANGE COLOR IF THE MOTIONSTATE IS NOT NORMAL
+                            xValueMapper: ( data, _) =>
+                                DateTime.fromMillisecondsSinceEpoch(
+                                  (data['timestamp'] * 1000).toInt()),
+                            yValueMapper: (data, _) =>
+                                (data['rmssd'] as num).toDouble(),
+                            color: Colors.deepPurpleAccent,
+                            enableTooltip: true,
+                            markerSettings: MarkerSettings(
+                              isVisible: true,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
+                              width: 6,
+                              height: 6,
+                              borderWidth: 0,
+                            ),
+                          ),
+                          SplineSeries(
+                              dataSource: widget.rmssdBaselineData,
+                              xValueMapper: ( data, _) =>
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    (data['timestamp'] * 1000).toInt()),
+                              yValueMapper: (data, _) =>
+                                  (data['rmssdBaseline'] as num).toDouble(),
+                              color: Colors.deepOrangeAccent,
+                              enableTooltip: true,
+                              markerSettings: MarkerSettings(
+                                isVisible: true,
+                                shape: DataMarkerType.circle,
+                                color: widget.currentTheme == 'light' 
+                                    ? Colors.white 
+                                    : const Color.fromARGB(255, 15, 15, 15),
+                                width: 6,
+                                height: 6,
+                                borderWidth: 0,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _LegendItem(color: Colors.deepOrangeAccent, label: 'RMSSD Baseline'),
+                          SizedBox(width: 16),
+                          _LegendItem(color: Colors.deepPurpleAccent, label: 'RMSSD'),
+                        ],
+                      ),
+                    ),
+                  ]
                 ],
               )
           ],

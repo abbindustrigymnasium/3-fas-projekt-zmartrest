@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pocketbase/pocketbase.dart';
 
+import 'package:zmartrest/app_constants.dart';
+
 SharedPreferences? prefs;
-final pb = PocketBase('https://zmartrest-pb.superdator.spetsen.net/', authStore: store);
+final pb = PocketBase(pocketbaseUrl, authStore: store);
 
 Future<void> initPrefs() async {
   debugPrint('Initializing prefs...');
@@ -35,20 +37,21 @@ authenticateUser(String email, String password) async {
       password,
     );
 
+    debugPrint('FULL AUTH DATA: $authData');
+
+    /*
+
     final userData = authData.record;
     final userMap = userData.data;
-
-    debugPrint('FULL AUTH DATA: $authData');
 
     // Fetch data with timestamp range
     int timestampFrom = 1734013000;
     int timestampTo = 1734014000;
 
-    await fetchAccelerometerData(pb, userMap['id'], timestampFrom, timestampTo);
-    await fetchHeartrateData(pb, userMap['id'], timestampFrom, timestampTo);
-
     // Fetch all data within the range
     await fetchAllDataFromTo(pb, userMap['id'], timestampFrom, timestampTo);
+
+    */
 
     return true;
   } catch (e) {
@@ -95,7 +98,6 @@ Future<Map<String, dynamic>?> getUserInfo() async {
       'username': userRecord.data['name'],
       'created': userRecord.data['created'],
       'updated': userRecord.data['updated'],
-      // Add any other fields you want to retrieve
     };
 
     return userInfo;
@@ -164,6 +166,50 @@ Future<void> addHeartrateData(
   }
 }
 
+Future<void> addRmssdData(
+  PocketBase pb,
+  String userId,
+  int timestamp, 
+  double rmssd
+) async {
+  try {
+    final rmssdData = {
+      'user': userId,
+      'timestamp': timestamp,
+      'rmssd': rmssd,
+    };
+
+    final result =
+        await pb.collection('rmssd_data').create(body: rmssdData);
+    debugPrint('RMSSD data added:');
+    debugPrint(result.toJson().toString());
+  } catch (e) {
+    debugPrint('Error adding RMSSD data: $e');
+  }
+}
+
+Future<void> addRmssdBaselineData(
+  PocketBase pb,
+  String userId,
+  int timestamp, 
+  double rmssdBaseline
+) async {
+  try {
+    final rmssdBaselineData = {
+      'user': userId,
+      'timestamp': timestamp,
+      'rmssd_baseline': rmssdBaseline,
+    };
+
+    final result =
+        await pb.collection('rmssd_baseline_data').create(body: rmssdBaselineData);
+    debugPrint('RMSSD data added:');
+    debugPrint(result.toJson().toString());
+  } catch (e) {
+    debugPrint('Error adding RMSSD data: $e');
+  }
+}
+
 // Fetch accelerometer data for a specific user within a timestamp range
 Future<List<Map<String, dynamic>>> fetchAccelerometerData(
     PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
@@ -185,10 +231,12 @@ Future<List<Map<String, dynamic>>> fetchAccelerometerData(
       };
     }).toList();
 
-    debugPrint('Fetched accelerometer data within range:');
+    debugPrint('Fetched accelerometer data within range');
+    /*
     for (var data in dataList) {
       debugPrint(data.toString());
     }
+    */
 
     return dataList;
   } catch (e) {
@@ -218,10 +266,12 @@ Future<List<Map<String, dynamic>>> fetchHeartrateData(
       };
     }).toList();
 
-    debugPrint('Fetched heart rate data within range:');
+    debugPrint('Fetched heart rate data within range');
+    /*
     for (var data in dataList) {
       debugPrint(data.toString());
     }
+    */
 
     return dataList;
   } catch (e) {
@@ -230,6 +280,71 @@ Future<List<Map<String, dynamic>>> fetchHeartrateData(
   }
 }
 
+Future<List<Map<String, dynamic>>> fetchRmssdData(
+    PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
+  try {
+    final result = await pb.collection('rmssd_data').getList(
+      page: 1,
+      perPage: 10,
+      filter:
+          'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
+    );
+
+    List<Map<String, dynamic>> dataList = result.items.map((record) {
+      return {
+        'timestamp': record.data['timestamp'],
+        'rmssd': record.data['rmssd'],
+        'user': record.data['user'],
+      };
+    }).toList();
+
+    debugPrint('Fetched rmssd data within range');
+    /*
+    for (var data in dataList) {
+      debugPrint(data.toString());
+    }
+    */
+
+    return dataList;
+  } catch (e) {
+    debugPrint('Failed to fetch rmssd data: $e');
+    return [];
+  }
+}
+
+Future<List<Map<String, dynamic>>> fetchRmssdBaselineData(
+    PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
+  try {
+    final result = await pb.collection('rmssd_baseline_data').getList(
+      page: 1,
+      perPage: 10,
+      filter:
+          'user = "$userId" && timestamp >= $timestampFrom && timestamp <= $timestampTo',
+    );
+
+    List<Map<String, dynamic>> dataList = result.items.map((record) {
+      return {
+        'timestamp': record.data['timestamp'],
+        'rmssd': record.data['rmssd_baseline'],
+        'user': record.data['user'],
+      };
+    }).toList();
+
+    debugPrint('Fetched rmssd baseline data within range');
+    /*
+    for (var data in dataList) {
+      debugPrint(data.toString());
+    }
+    */
+
+    return dataList;
+  } catch (e) {
+    debugPrint('Failed to fetch rmssd baseline data: $e');
+    return [];
+  }
+}
+
+
 // Fetch all data (accelerometer + heart rate) within a timestamp range
 Future fetchAllDataFromTo(PocketBase pb, String userId, int timestampFrom, int timestampTo) async {
   debugPrint('Fetching all data within range...');
@@ -237,10 +352,16 @@ Future fetchAllDataFromTo(PocketBase pb, String userId, int timestampFrom, int t
     await fetchAccelerometerData(pb, userId, timestampFrom, timestampTo);
   final heartrateData =
     await fetchHeartrateData(pb, userId, timestampFrom, timestampTo);
+  final rmssdData =
+    await fetchRmssdData(pb, userId, timestampFrom, timestampTo);
+  final rmssdBaselineData =
+    await fetchRmssdBaselineData(pb, userId, timestampFrom, timestampTo);
 
   return {
     'accelerometer': accelerometerData,
     'heartrate': heartrateData,
+    'rmssd': rmssdData,
+    'rmssd_baseline': rmssdBaselineData,
   };
 }
 

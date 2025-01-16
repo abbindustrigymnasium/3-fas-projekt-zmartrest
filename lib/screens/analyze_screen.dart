@@ -11,6 +11,8 @@ class AnalyzeScreen extends StatefulWidget {
   final Map<String, dynamic>? selectedUser;
   final List<Map<String, dynamic>> accelerometerData;
   final List<Map<String, dynamic>> heartRateData;
+  final List rmssdData;
+  final List rmssdBaselineData;
   final ShadDateTimeRange? selectedDateRange;
   final Function(ShadDateTimeRange) onDateRangeSelected;
   final bool isLoading;
@@ -23,6 +25,8 @@ class AnalyzeScreen extends StatefulWidget {
     required this.selectedUser,
     required this.accelerometerData,
     required this.heartRateData,
+    this.rmssdData = const [],
+    this.rmssdBaselineData = const [],
     required this.selectedDateRange,
     required this.onDateRangeSelected,
     required this.isLoading,
@@ -101,6 +105,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   currentTheme: widget.currentTheme,
                   accelerometerData: widget.accelerometerData,
                   heartRateData: widget.heartRateData,
+                  rmssdData: widget.rmssdData,
+                  rmssdBaselineData: widget.rmssdBaselineData,
                   selectedDateRange: widget.selectedDateRange,
                   onDateRangeSelected: widget.onDateRangeSelected,
                   isLoading: widget.isLoading,
