@@ -7,6 +7,7 @@ import 'package:zmartrest/widgets/confirm_button.dart';
 import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/widgets/zmartrest_logo.dart';
 import 'package:zmartrest/app_constants.dart';
+import 'package:zmartrest/widgets/divider.dart';
 
 import 'package:zmartrest/device_handler.dart';
 import 'package:zmartrest/logic.dart';
@@ -305,6 +306,8 @@ class SettingsScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 100),
+
+              VisualDivider(currentTheme: currentTheme),
 
               // Footer Section
               Container(

@@ -45,7 +45,19 @@ class _MainScaffoldState extends State<MainScaffold> {
     super.initState();
     _currentTheme = widget.currentTheme;  // Set initial theme
 
+    _fetchLatestDate();
     _listenToRealTimeData(widget.healthMonitorSystem);
+  }
+
+  Future<void> _fetchLatestDate() async {
+    DateTime latestDate = await getLatestDataDate();
+    setState(() {
+      _selectedDateRange = ShadDateTimeRange(
+        start: latestDate.subtract(Duration(days: 1)),
+        end: latestDate.add(Duration(days: 1)),
+      );
+    });
+    _handleDateRangeSelected(_selectedDateRange);
   }
 
   void _updateTheme(String newTheme) {
@@ -55,12 +67,14 @@ class _MainScaffoldState extends State<MainScaffold> {
     widget.onThemeChanged(newTheme);  // Propagate theme change up to the parent
   }
 
-  Future<void> _handleDateRangeSelected(ShadDateTimeRange range) async {
-    if (_selectedUser == null) return;
+  Future<void> _handleDateRangeSelected(ShadDateTimeRange? range) async {
+    debugPrint(range.toString());
+    if (range == null || _selectedUser == null) return;
     
     setState(() {
       _isLoading = true;
       _selectedDateRange = range;
+      _hasFetchedData = false;
     });
 
     // Fetch data for selected date range
@@ -161,6 +175,8 @@ class _MainScaffoldState extends State<MainScaffold> {
             _selectedUser = user;
             _hasFetchedData = false;
           });
+
+          _fetchLatestDate();
         },
         currentTheme: _currentTheme,
         selectedUser: _selectedUser,

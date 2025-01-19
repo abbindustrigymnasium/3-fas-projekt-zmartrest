@@ -387,3 +387,58 @@ Future<List<Map<String, dynamic>>> fetchAllUsers(PocketBase pb) async {
     return []; // Return empty list in case of error
   }
 }
+
+// Get the latest day that has data
+Future<DateTime> getLatestDataDate() async {
+  try {
+    // Fetch the most recent record from each collection
+    final latestAccelerometer = await pb.collection('accelerometer_data').getList(
+      page: 1,
+      perPage: 1,
+      sort: '-timestamp', // Sort in descending order by timestamp
+    );
+    final latestHeartrate = await pb.collection('heart_rate_data').getList(
+      page: 1,
+      perPage: 1,
+      sort: '-timestamp', // Sort in descending order by timestamp
+    );
+    final latestRmssd = await pb.collection('rmssd_data').getList(
+      page: 1,
+      perPage: 1,
+      sort: '-timestamp', // Sort in descending order by timestamp
+    );
+    final latestRmssdBaseline = await pb.collection('rmssd_baseline_data').getList(
+      page: 1,
+      perPage: 1,
+      sort: '-timestamp', // Sort in descending order by timestamp
+    );
+
+    // Find the latest timestamp from all the data collections
+    int latestTimestamp = 0;
+
+    if (latestAccelerometer.items.isNotEmpty) {
+      latestTimestamp = latestAccelerometer.items[0].data['timestamp'];
+    }
+    if (latestHeartrate.items.isNotEmpty) {
+      latestTimestamp = latestTimestamp > latestHeartrate.items[0].data['timestamp']
+          ? latestTimestamp
+          : latestHeartrate.items[0].data['timestamp'];
+    }
+    if (latestRmssd.items.isNotEmpty) {
+      latestTimestamp = latestTimestamp > latestRmssd.items[0].data['timestamp']
+          ? latestTimestamp
+          : latestRmssd.items[0].data['timestamp'];
+    }
+    if (latestRmssdBaseline.items.isNotEmpty) {
+      latestTimestamp = latestTimestamp > latestRmssdBaseline.items[0].data['timestamp']
+          ? latestTimestamp
+          : latestRmssdBaseline.items[0].data['timestamp'];
+    }
+
+    // Return the latest date
+    return DateTime.fromMillisecondsSinceEpoch(latestTimestamp * 1000);
+  } catch (e) {
+    debugPrint('Error fetching latest data date: $e');
+    return DateTime(2000); // Default to a far past date if error occurs
+  }
+}
