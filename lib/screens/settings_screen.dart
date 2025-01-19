@@ -175,7 +175,6 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height,
           //alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
@@ -232,9 +231,9 @@ class SettingsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ConfirmButton(
-                            buttonText: "Logout",
-                            dialogTitle: "Confirm Logout",
-                            dialogDescription: "Are you sure you want to logout?",
+                            buttonText: 'Logout',
+                            dialogTitle: 'Confirm Logout',
+                            dialogDescription: 'Are you sure you want to logout?',
                             onConfirm: () {
                               logout();
                               Navigator.of(context).pushReplacement(
@@ -248,13 +247,16 @@ class SettingsScreen extends StatelessWidget {
                                 ),
                               );
                             },
+                            buttonVariant: ShadButtonVariant.outline,
                           ),
-                          ShadButton.outline(
-                            child: const Text('Change password'),
-                            onPressed: () {
-                              // TODO: Implement change password
+                          ConfirmButton(
+                            buttonText: 'Delete all data',
+                            dialogTitle: 'Confirm deletion of all data',
+                            dialogDescription: 'Are you absolutely sure you want to delete all data? This action cannot be undone.',
+                            onConfirm: () {
+                              //deleteDataExceptFirst(pb, userId);
                             },
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -305,7 +307,7 @@ class SettingsScreen extends StatelessWidget {
                 initialValue: currentTheme,
               ),
 
-              const SizedBox(height: 100),
+              const SizedBox(height: 60),
 
               VisualDivider(currentTheme: currentTheme),
 
@@ -326,6 +328,7 @@ class SettingsScreen extends StatelessWidget {
                       "zmartrest analysis tool   v. $appVersion",
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),

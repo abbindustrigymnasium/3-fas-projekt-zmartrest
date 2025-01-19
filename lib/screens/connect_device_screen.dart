@@ -63,10 +63,14 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
     return Scaffold(
       body: Center(
         child: Container(
+          width: MediaQuery.of(context).size.width - 60,
           padding: const EdgeInsets.only(bottom: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text("Measure", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
               ShadTabs(
                 value: currentTab,
                 onChanged: (value) {
@@ -112,9 +116,14 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
                       child: ValueListenableBuilder<List<String>>(
                         valueListenable: widget.deviceHandler.logs,
                         builder: (context, logs, _) {
-                          return Column(
-                            children: logs.reversed.take(10).map(Text.new).toList(),
-                          );
+                          if (logs.isEmpty) {
+                            return const Text('No logs available, make sure to connect first.');
+                          } else {
+                            return Column(
+                              children: logs.reversed.take(10).map(Text.new).toList(),
+                            );
+                          }
+                          
                         },
                       )
                     ),

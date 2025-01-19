@@ -143,22 +143,6 @@ class _MainScaffoldState extends State<MainScaffold> {
     */
   }
 
-  /*
-  Widget _getAnalyzeScreen() {
-    if (_selectedUser == null) {
-      return AnalyzeScreen(
-        onUserSelected: (user) {
-          setState(() {
-            _selectedUser = user;
-          });
-        },
-      );
-    } else {
-      return DataVisualizationScreen(selectedUser: _selectedUser!);
-    }
-  }
-  */
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> baseScreens = [
@@ -168,7 +152,6 @@ class _MainScaffoldState extends State<MainScaffold> {
         healthMonitorSystem: widget.healthMonitorSystem,
         deviceHandler: widget.deviceHandler,
       ),
-      //_getAnalyzeScreen(),
       AnalyzeScreen(
         onUserSelected: (user) {
           setState(() {

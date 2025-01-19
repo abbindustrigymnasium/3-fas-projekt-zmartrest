@@ -39,20 +39,6 @@ authenticateUser(String email, String password) async {
 
     debugPrint('FULL AUTH DATA: $authData');
 
-    /*
-
-    final userData = authData.record;
-    final userMap = userData.data;
-
-    // Fetch data with timestamp range
-    int timestampFrom = 1734013000;
-    int timestampTo = 1734014000;
-
-    // Fetch all data within the range
-    await fetchAllDataFromTo(pb, userMap['id'], timestampFrom, timestampTo);
-
-    */
-
     return true;
   } catch (e) {
     debugPrint('Error during authentication: $e');
@@ -170,13 +156,15 @@ Future<void> addRmssdData(
   PocketBase pb,
   String userId,
   int timestamp, 
-  double rmssd
+  double rmssd,
+  bool isExercising
 ) async {
   try {
     final rmssdData = {
       'user': userId,
       'timestamp': timestamp,
       'rmssd': rmssd,
+      'is_exercising': isExercising,
     };
 
     final result =
@@ -295,6 +283,7 @@ Future<List<Map<String, dynamic>>> fetchRmssdData(
         'timestamp': record.data['timestamp'],
         'rmssd': record.data['rmssd'],
         'user': record.data['user'],
+        'is_exercising': record.data['is_exercising'],
       };
     }).toList();
 
@@ -440,5 +429,86 @@ Future<DateTime> getLatestDataDate() async {
   } catch (e) {
     debugPrint('Error fetching latest data date: $e');
     return DateTime(2000); // Default to a far past date if error occurs
+  }
+}
+
+Future<void> deleteDataExceptFirst(PocketBase pb, String userId, int exceptFirst) async {
+  try {
+    // Fetch the data from all collections using pagination
+    final accelerometerData = await _fetchAllDataWithPagination(pb, 'accelerometer_data', userId);
+    final heartrateData = await _fetchAllDataWithPagination(pb, 'heart_rate_data', userId);
+    final rmssdData = await _fetchAllDataWithPagination(pb, 'rmssd_data', userId);
+    final rmssdBaselineData = await _fetchAllDataWithPagination(pb, 'rmssd_baseline_data', userId);
+
+    debugPrint(accelerometerData.length.toString() + ' accelerometer records found');
+    debugPrint(heartrateData.length.toString() + ' heartrate records found');
+    debugPrint(rmssdData.length.toString() + ' rmssd records found');
+    debugPrint(rmssdBaselineData.length.toString() + ' rmssd baseline records found');
+
+    // Function to delete extra records in a collection
+    Future<void> deleteExtraRecords(List<Map<String, dynamic>> data, String collectionName, int exceptFirst) async {
+      if (data.length > exceptFirst) {
+        // Keep the first x entries, delete the rest
+        final recordsToDelete = data.skip(exceptFirst).toList();
+        
+        for (var record in recordsToDelete) {
+          try {
+            await pb.collection(collectionName).delete(record['id']);
+            debugPrint('Deleted record with ID: ${record['id']} from $collectionName');
+          } catch (e) {
+            debugPrint('Error deleting record from $collectionName: $e');
+          }
+        }
+      }
+    }
+
+    // Delete extra data in each collection
+    await deleteExtraRecords(accelerometerData, 'accelerometer_data', exceptFirst);
+    await deleteExtraRecords(heartrateData, 'heart_rate_data', exceptFirst);
+    await deleteExtraRecords(rmssdData, 'rmssd_data', exceptFirst);
+    await deleteExtraRecords(rmssdBaselineData, 'rmssd_baseline_data', exceptFirst);
+
+    debugPrint('Data cleanup completed, only first 40 entries remain.');
+  } catch (e) {
+    debugPrint('Error during data cleanup: $e');
+  }
+}
+
+// Helper function to fetch all data from a collection with pagination
+Future<List<Map<String, dynamic>>> _fetchAllDataWithPagination(
+    PocketBase pb, String collectionName, String userId) async {
+  try {
+    // List to hold all the data
+    List<Map<String, dynamic>> allData = [];
+    int page = 1;
+    bool hasMoreData = true;
+
+    // Loop through all the pages
+    while (hasMoreData) {
+      // Fetch a page of data
+      final result = await pb.collection(collectionName).getList(
+        page: page,
+        perPage: 100, // Increase this to fetch more records per page (up to 100)
+        filter: 'user = "$userId"',
+      );
+
+      // Add the records to the allData list
+      allData.addAll(result.items.map((record) {
+        return {
+          'id': record.id,  // Including the ID for deletion
+          'timestamp': record.data['timestamp'],
+        };
+      }).toList());
+
+      // Check if there are more pages
+      hasMoreData = result.items.length == 100; // If exactly 100 records were returned, there might be another page
+      page++;
+    }
+
+    debugPrint('Fetched ${allData.length} records from $collectionName');
+    return allData;
+  } catch (e) {
+    debugPrint('Failed to fetch data from $collectionName: $e');
+    return [];
   }
 }

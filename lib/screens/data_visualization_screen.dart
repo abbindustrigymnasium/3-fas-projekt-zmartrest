@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:zmartrest/widgets/divider.dart';
+import 'package:zmartrest/widgets/chart_sheet.dart';
+
 class DataVisualizationScreen extends StatefulWidget {
   final Map<String, dynamic> selectedUser;
   final String currentTheme;
@@ -32,11 +35,29 @@ class DataVisualizationScreen extends StatefulWidget {
   _DataVisualizationState createState() => _DataVisualizationState();
 }
 
+double getMaxRmssd(List<dynamic> data) {
+  double maxValue = 0;
+  for (var point in data) {
+    double rmssd = (point['rmssd'] as num).toDouble();
+    if (rmssd > maxValue) {
+      maxValue = rmssd;
+    }
+  }
+  debugPrint('Max rmssd: $maxValue');
+  return maxValue;
+}
+
 class _DataVisualizationState extends State<DataVisualizationScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _displayHeartRate = true;
+  bool _displayAccelerometer = true;
+  bool _displayRmssd = true;
+  bool _trendlines = false;
 
   @override
   Widget build(BuildContext context) {
+    final maxRmssd = getMaxRmssd(widget.rmssdData);
+
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.only(bottom: 60),
@@ -47,10 +68,15 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 40, top: 60),
+              padding: const EdgeInsets.only(bottom: 40, top: 20),
               child: ShadDateRangePickerFormField(
                 width: MediaQuery.of(context).size.width - 60,
-                label: const Text('Select date range'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                label: Container(
+                  width: MediaQuery.of(context).size.width - 60,
+                  alignment: Alignment.center,
+                  child: Text('Date range',),
+                ),
                 initialValue: widget.selectedDateRange,
                 validator: (v) {
                   if (v == null) return 'A range of dates is required.';
@@ -65,7 +91,53 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 20,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShadSwitch(value: _displayHeartRate, onChanged: (value) => setState(() => _displayHeartRate = value), label: const Text('Heart Rate'), checkedTrackColor: Colors.redAccent,),
+                    ShadSwitch(value: _displayAccelerometer, onChanged: (value) => setState(() => _displayAccelerometer = value), label: const Text('Accelerometer'), checkedTrackColor: Colors.blueAccent,),
+                    ShadSwitch(value: _displayRmssd, onChanged: (value) => setState(() => _displayRmssd = value), label: const Text('RMSSD'), checkedTrackColor: Colors.deepPurpleAccent,),
+                  ],
+                ),
+                Column(
+                  children: [
+                    ShadButton.secondary(
+                      height: 90,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const Text('Configure charts'),
+                      onPressed: () => showShadSheet(
+                        context: context,
+                        builder: (context) => TimeFilterSheet(
+                          onSave: (trendlines) {
+                            if (trendlines) {
+                              setState(() {
+                                _trendlines = trendlines;
+                              });
+                            }
+                          },
+                          trendlines: _trendlines,
+                          onSwitch: (value) {
+                            setState(() {
+                              _trendlines = value;
+                            });
+                          },
+                        ),
+                        side: ShadSheetSide.right,
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 60,
+              child: VisualDivider(currentTheme: widget.currentTheme)
+            ),
+            const SizedBox(height: 40),
             if (widget.isLoading)
               const CircularProgressIndicator()
             else if (!widget.hasFetchedData)
@@ -76,7 +148,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
               Column(
                 children: [
                   // Heart Rate Chart
-                  if (widget.heartRateData.isNotEmpty) ...[
+                  if (widget.heartRateData.isNotEmpty && _displayHeartRate) ...[
                     const Text(
                       'Heart Rate',
                       style: TextStyle(
@@ -116,8 +188,11 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         ),
                         plotAreaBorderWidth: 0,
                         series: <CartesianSeries<dynamic, dynamic>>[
-                          SplineSeries<Map<String, dynamic>, DateTime>(
+                          LineSeries<Map<String, dynamic>, DateTime>(
                             dataSource: widget.heartRateData,
+                            trendlines: <Trendline>[
+                              if (_trendlines) Trendline(color: widget.currentTheme == 'dark' ? const Color.fromARGB(255, 46, 46, 46) : const Color.fromARGB(255, 196, 196, 196), type: TrendlineType.linear),
+                            ],
                             xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
@@ -143,7 +218,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                   ],
                   const SizedBox(height: 60),
                   // Accelerometer Chart
-                  if (widget.accelerometerData.isNotEmpty) ...[
+                  if (widget.accelerometerData.isNotEmpty && _displayAccelerometer) ...[
                     const Text(
                       'Accelerometer',
                       style: TextStyle(
@@ -255,7 +330,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                     ),
                   ],
                   const SizedBox(height: 60),
-                  if (widget.rmssdData.isNotEmpty) ...[
+                  if (widget.rmssdData.isNotEmpty && _displayRmssd) ...[
                     const Text(
                       'RMSSD',
                       style: TextStyle(
@@ -283,7 +358,10 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                         plotAreaBorderWidth: 0,
                         series: <CartesianSeries<dynamic, dynamic>>[
                           SplineSeries(
-                            dataSource: widget.rmssdData, // TODO: CHANGE COLOR IF THE MOTIONSTATE IS NOT NORMAL
+                            dataSource: widget.rmssdData,
+                            trendlines: <Trendline>[
+                              if (_trendlines) Trendline(color: widget.currentTheme == 'dark' ? const Color.fromARGB(255, 46, 46, 46) : const Color.fromARGB(255, 196, 196, 196), type: TrendlineType.linear),
+                            ],
                             xValueMapper: ( data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                   (data['timestamp'] * 1000).toInt()),
@@ -291,6 +369,31 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                 (data['rmssd'] as num).toDouble(),
                             color: Colors.deepPurpleAccent,
                             enableTooltip: true,
+                            markerSettings: MarkerSettings(
+                              //isVisible: true,
+                              isVisible: false,
+                              shape: DataMarkerType.circle,
+                              color: widget.currentTheme == 'light' 
+                                  ? Colors.white 
+                                  : const Color.fromARGB(255, 15, 15, 15),
+                              width: 6,
+                              height: 6,
+                              borderWidth: 0,
+                            ),
+                          ),
+                          AreaSeries(
+                            enableTrackball: false,
+                            dataSource: widget.rmssdData,
+                            xValueMapper: ( data, _) =>
+                                DateTime.fromMillisecondsSinceEpoch(
+                                  (data['timestamp'] * 1000).toInt()),
+                            yValueMapper: (data, _) {
+                              debugPrint('Max rmssd in chart: $maxRmssd');
+                              debugPrint(data['is_exercising'].toString());
+                              return data['is_exercising'] ? maxRmssd : 0.0;
+                            },
+                            color: const Color.fromARGB(255, 255, 95, 149),
+                            opacity: 0.2,
                             markerSettings: MarkerSettings(
                               //isVisible: true,
                               isVisible: false,
@@ -335,6 +438,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           _LegendItem(color: Colors.deepOrangeAccent, label: 'Baseline'),
                           SizedBox(width: 16),
                           _LegendItem(color: Colors.deepPurpleAccent, label: 'RMSSD'),
+                          SizedBox(width: 16),
+                          _LegendItem(color: Colors.pinkAccent, label: 'Exercising'),
                         ],
                       ),
                     ),

@@ -47,10 +47,12 @@ class HeartRateReading {
 class RMSSDData {
   final int timestamp;
   final double rmssd;
+  final bool isExercising;
 
   RMSSDData({
     required this.timestamp,
     required this.rmssd,
+    required this.isExercising,
   });
 
   Map<String, dynamic> toJson() => {
@@ -166,10 +168,11 @@ class HealthMonitorSystem {
     return rmssd;
   }
 
-  void processRmssdData(double rmssd) {
+  void processRmssdData(double rmssd, bool isExercising) {
     final reading = RMSSDData(
       timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       rmssd: rmssd,
+      isExercising: isExercising,
     );
 
     _rmssdController.add(reading);
@@ -299,7 +302,7 @@ class HealthMonitorSystem {
 
     try {
       final List<Future<void>> futures = _rmssdBuffer.map((reading) {
-        return addRmssdData(pb, userId, reading.timestamp, reading.rmssd);
+        return addRmssdData(pb, userId, reading.timestamp, reading.rmssd, reading.isExercising);
       }).toList();
 
       await Future.wait(futures);

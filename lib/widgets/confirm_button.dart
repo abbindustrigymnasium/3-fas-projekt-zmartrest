@@ -6,6 +6,7 @@ class ConfirmButton extends StatelessWidget {
   final String dialogTitle;
   final String dialogDescription;
   final VoidCallback onConfirm; // Accept a function that will be executed on confirm
+  final ShadButtonVariant buttonVariant;
 
   // Constructor accepts the text for the button, title, description, and the onConfirm function
   const ConfirmButton({
@@ -14,37 +15,72 @@ class ConfirmButton extends StatelessWidget {
     required this.dialogTitle,
     required this.dialogDescription,
     required this.onConfirm, // Pass the onConfirm function as a parameter
+    this.buttonVariant = ShadButtonVariant.destructive,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ShadButton.destructive(
-      child: Text(buttonText), // Use the button text passed to the widget
-      onPressed: () {
-        showShadDialog(
-          context: context,
-          builder: (context) => ShadDialog.alert(
-            title: Text(dialogTitle), // Use the dialog title passed to the widget
-            description: Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(dialogDescription), // Use the dialog description passed to the widget
+    if (buttonVariant == ShadButtonVariant.outline) {
+      return ShadButton.outline(
+        child: Text(buttonText), // Use the button text passed to the widget
+        onPressed: () {
+          showShadDialog(
+            context: context,
+            builder: (context) => ShadDialog.alert(
+              title: Text(dialogTitle), // Use the dialog title passed to the widget
+              description: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(dialogDescription), // Use the dialog description passed to the widget
+              ),
+              actions: [
+                ShadButton.outline(
+                  child: const Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                ShadButton(
+                  child: const Text('Continue'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    onConfirm(); 
+                  },
+                ),
+              ],
             ),
-            actions: [
-              ShadButton.outline(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
+          );
+        },
+      );
+    } else if (buttonVariant == ShadButtonVariant.destructive) {
+      return ShadButton.destructive(
+        child: Text(buttonText), // Use the button text passed to the widget
+        onPressed: () {
+          showShadDialog(
+            context: context,
+            builder: (context) => ShadDialog.alert(
+              title: Text(dialogTitle), // Use the dialog title passed to the widget
+              description: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(dialogDescription), // Use the dialog description passed to the widget
               ),
-              ShadButton(
-                child: const Text('Continue'),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                  onConfirm(); 
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              actions: [
+                ShadButton.outline(
+                  child: const Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                ShadButton(
+                  child: const Text('Continue'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    onConfirm(); 
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+    else {
+      return Container();
+    }
   }
 }

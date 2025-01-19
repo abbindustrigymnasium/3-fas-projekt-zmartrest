@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:polar/polar.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:zmartrest/bluetooth_permission_handler.dart';
+import 'package:zmartrest/services/bluetooth_permission_handler.dart';
 import 'package:zmartrest/logic.dart';
 
 class DeviceHandler {
@@ -120,7 +120,7 @@ class DeviceHandler {
           rrIntervals += [ppiSample.ppi.toDouble()];
           if (rrIntervals.isNotEmpty) {
             final rmssd = healthMonitorSystem.calculateRmssd(rrIntervals);
-            healthMonitorSystem.processRmssdData(rmssd);
+            healthMonitorSystem.processRmssdData(rmssd, isExercising.value);
           }
         });
       }
