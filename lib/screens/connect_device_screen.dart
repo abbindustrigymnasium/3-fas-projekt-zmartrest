@@ -20,16 +20,7 @@ class DeviceScreen extends StatefulWidget {
 }
 
 class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver {
-  //static const identifier = 'C36A972B';
-  // static const identifier = 'E985E828';
-
   String currentTab = "connect";
-
-  /*
-  DeviceHandler? deviceHandler;
-  HealthMonitorSystem? healthMonitorSystem;
-  bool isLoading = true;
-  */
 
   Future<String?> getUserId() async {
     final userInfo = await getUserInfo();
@@ -42,64 +33,11 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    //_initializeDeviceHandler();
   }
-
-  /*
-  Future<void> _initializeDeviceHandler() async {
-    try {
-      final userInfo = await getUserInfo(); // Fetch user info
-      final userId = userInfo?['id'];
-
-      if (userId == null) {
-        throw Exception("User ID is null");
-      }
-
-      healthMonitorSystem = HealthMonitorSystem(userId: userId); // Initialize HealthMonitorSystem
-      deviceHandler = DeviceHandler(
-        identifier: identifier,
-        healthMonitorSystem: healthMonitorSystem!,
-      );
-
-      _addDeviceHandlerListeners();
-    } catch (e) {
-      debugPrint("Error initializing DeviceHandler: $e");
-    } finally {
-      setState(() {
-        isLoading = false; // Initialization is complete
-      });
-    }
-  }
-
-  void _addDeviceHandlerListeners() {
-    if (deviceHandler == null) return;
-
-    deviceHandler!.polar.batteryLevel.listen(
-      (e) => setState(() => deviceHandler!.log('Battery: ${e.level}')),
-      onError: (error) => setState(() => deviceHandler!.log('Battery error: $error')),
-    );
-
-    deviceHandler!.polar.deviceConnecting.listen(
-      (_) => setState(() => deviceHandler!.log('Device connecting')),
-      onError: (error) => setState(() => deviceHandler!.log('Connecting error: $error')),
-    );
-
-    deviceHandler!.polar.deviceConnected.listen(
-      (_) => setState(() => deviceHandler!.log('Device connected')),
-      onError: (error) => setState(() => deviceHandler!.log('Connection error: $error')),
-    );
-
-    deviceHandler!.polar.deviceDisconnected.listen(
-      (_) => setState(() => deviceHandler!.log('Device disconnected')),
-      onError: (error) => setState(() => deviceHandler!.log('Disconnection error: $error')),
-    );
-  }
-  */
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    //deviceHandler?.disconnect();
     super.dispose();
   }
 
@@ -122,24 +60,6 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    /*
-    if (isLoading) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    if (deviceHandler == null || healthMonitorSystem == null) {
-      return Scaffold(
-        body: Center(
-          child: Text("Failed to initialize DeviceHandler or HealthMonitorSystem."),
-        ),
-      );
-    }
-    */
-
     return Scaffold(
       body: Center(
         child: Container(

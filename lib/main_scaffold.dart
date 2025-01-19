@@ -96,38 +96,38 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   void _listenToRealTimeData(HealthMonitorSystem healthMonitorSystem) {
-  healthMonitorSystem.heartRateStream.listen((data) {
-    setState(() {
-      _heartRateData.add(data.toJson());
+    healthMonitorSystem.heartRateStream.listen((data) {
+      setState(() {
+        _heartRateData.add(data.toJson());
+      });
     });
-  });
 
-  healthMonitorSystem.accelerometerStream.listen((data) {
-    setState(() {
-      _accelerometerData.add(data.toJson());
+    healthMonitorSystem.accelerometerStream.listen((data) {
+      setState(() {
+        _accelerometerData.add(data.toJson());
+      });
     });
-  });
 
-  healthMonitorSystem.rmssdStream.listen((data) {
-    setState(() {
-      _rmssdData.add(data.toJson());
+    healthMonitorSystem.rmssdStream.listen((data) {
+      setState(() {
+        _rmssdData.add(data.toJson());
+      });
     });
-  });
 
-  healthMonitorSystem.baselineStream.listen((data) {
-    setState(() {
-      _rmssdBaselineData.add(data.toJson());
+    healthMonitorSystem.baselineStream.listen((data) {
+      setState(() {
+        _rmssdBaselineData.add(data.toJson());
+      });
     });
-  });
 
-  /*
-  healthMonitorSystem.baselineStream.listen((baseline) {
-    setState(() {
-      _rmssdBaselineData.add({'timestamp': DateTime.now().millisecondsSinceEpoch ~/ 1000, 'baseline': baseline});
+    /*
+    healthMonitorSystem.baselineStream.listen((baseline) {
+      setState(() {
+        _rmssdBaselineData.add({'timestamp': DateTime.now().millisecondsSinceEpoch ~/ 1000, 'baseline': baseline});
+      });
     });
-  });
-  */
-}
+    */
+  }
 
   /*
   Widget _getAnalyzeScreen() {

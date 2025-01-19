@@ -109,12 +109,21 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (healthMonitorSystem == null || deviceHandler == null) {
+      return const Center(child: Text("Initialization failed."));
+    }
+
     return ShadApp(
       theme: ShadThemeData(
         colorScheme: const ShadNeutralColorScheme.light(),
         brightness: Brightness.light,
         //textTheme: ShadTextTheme(family: 'RedHatDisplay'),
         textTheme: ShadTextTheme(family: 'Inter'),
+        //radius: BorderRadius.all(Radius.circular(32)),
       ),
       darkTheme: ShadThemeData(
         colorScheme: const ShadNeutralColorScheme.dark(
@@ -123,6 +132,7 @@ class _AppState extends State<App> {
         brightness: Brightness.dark,
         //textTheme: ShadTextTheme(family: 'RedHatDisplay'),
         textTheme: ShadTextTheme(family: 'Inter'),
+        //radius: BorderRadius.all(Radius.circular(32)),
       ),
       themeMode: _themeMode,
       home: ScaffoldMessenger(
