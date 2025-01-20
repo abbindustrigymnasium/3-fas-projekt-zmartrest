@@ -1,16 +1,22 @@
-# zmartrest
+# Flutter application for Zmartrest (android)
+This android application allows the user to track and log activity and health related data measured by a Polar Verity Sense. The application is made with [Flutter](flutter.dev) and the code is written in [Dart](dart.dev). This application was made because of a request from [Zmartrest](zmartrest.ai).
 
-A new Flutter project.
+## Install
+Firstly need to make sure you have the right software installed. The easiest way to do that is by following [this](https://docs.flutter.dev/get-started/install/windows/mobile) guide.
+After that you can proceed by cloning the repository.
+```bash
+git clone https://github.com/JakobGillarKebab/3-fas-projekt-zmartrest.git
+```
+Download the needed dependencies.
+```
+flutter pub get
+```
+## How to use
+You can run this application on an emulated device(this solution is good if you don't have an android), or run the code on a real mobile device. To properly prepare your device it could be a good idea to look at a tutorial for your specific device to make sure everything set up correctly.
+## Credits
+* Hannes Gingby
+* Alwin Forslund
+* Jakob Geffen
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Known issues
+Heart rate data not updating live to the phone while streaming from the sensor.
