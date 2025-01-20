@@ -36,6 +36,8 @@ class DataVisualizationScreen extends StatefulWidget {
 }
 
 double getMaxRmssd(List<dynamic> data) {
+  debugPrint('RMSSD data in data_visualization_screen: $data');
+
   double maxValue = 0;
   for (var point in data) {
     double rmssd = (point['rmssd'] as num).toDouble();
@@ -356,7 +358,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           majorGridLines: const MajorGridLines(width: 0),
                         ),
                         plotAreaBorderWidth: 0,
-                        series: <CartesianSeries<dynamic, dynamic>>[
+                        series: <CartesianSeries<Map<String, dynamic>, DateTime>>[
                           SplineSeries(
                             dataSource: widget.rmssdData,
                             trendlines: <Trendline>[
@@ -381,14 +383,15 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                               borderWidth: 0,
                             ),
                           ),
-                          AreaSeries(
+                          StepAreaSeries(
                             enableTrackball: false,
                             dataSource: widget.rmssdData,
-                            xValueMapper: ( data, _) =>
+                            xValueMapper: (Map<String, dynamic> data, _) =>
                                 DateTime.fromMillisecondsSinceEpoch(
                                   (data['timestamp'] * 1000).toInt()),
-                            yValueMapper: (data, _) {
-                              debugPrint('Max rmssd in chart: $maxRmssd');
+                            yValueMapper: (Map<String, dynamic>data, _) {
+                              //debugPrint('Max rmssd in chart: $maxRmssd');
+                              debugPrint('Data from within the chart is: ${data.toString()}');
                               debugPrint(data['is_exercising'].toString());
                               return data['is_exercising'] ? maxRmssd : 0.0;
                             },
@@ -408,7 +411,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                           ),
                           SplineSeries(
                               dataSource: widget.rmssdBaselineData,
-                              xValueMapper: ( data, _) =>
+                              xValueMapper: (Map<String, dynamic> data, _) =>
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
                               yValueMapper: (data, _) =>

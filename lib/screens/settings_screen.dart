@@ -9,7 +9,8 @@ import 'package:zmartrest/widgets/zmartrest_logo.dart';
 import 'package:zmartrest/app_constants.dart';
 import 'package:zmartrest/widgets/divider.dart';
 
-import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/simulated_device_handler.dart';
 import 'package:zmartrest/logic.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -238,6 +239,7 @@ class SettingsScreen extends StatelessWidget {
                             dialogDescription: 'Are you sure you want to logout?',
                             onConfirm: () {
                               logout();
+                              /*
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => LoginScreen(
@@ -249,6 +251,7 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
+                              */
                             },
                             buttonVariant: ShadButtonVariant.outline,
                           ),

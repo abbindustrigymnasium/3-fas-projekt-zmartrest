@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/simulated_device_handler.dart';
 import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/logic.dart';
  
@@ -93,6 +94,7 @@ class _DeviceScreenState extends State<DeviceScreen> with WidgetsBindingObserver
                           return ShadButton(
                             icon: ShadImage(isConnected ? LucideIcons.square : LucideIcons.cable),
                             onPressed: () async {
+                              debugPrint('isConnected: $isConnected');
                               if (isConnected) {
                                 await widget.deviceHandler.disconnect();
                               } else {

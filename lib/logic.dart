@@ -58,6 +58,7 @@ class RMSSDData {
   Map<String, dynamic> toJson() => {
     'timestamp': timestamp,
     'rmssd': rmssd,
+    'is_exercising': isExercising,
   };
 }
 
@@ -169,6 +170,7 @@ class HealthMonitorSystem {
   }
 
   void processRmssdData(double rmssd, bool isExercising) {
+    debugPrint('Processing RMSSD data: $rmssd, isExercising: $isExercising');
     final reading = RMSSDData(
       timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       rmssd: rmssd,

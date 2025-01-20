@@ -3,23 +3,26 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/pocketbase.dart';
-import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/simulated_device_handler.dart';
 import 'package:zmartrest/logic.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(String) onThemeChanged; // Accept a callback for theme changes
   final String currentTheme;
-  final HealthMonitorSystem healthMonitorSystem;
-  final DeviceHandler deviceHandler;
-  final String userId;
+  final Function initializeDeviceHandlerFromLoginScreen;
+  //final HealthMonitorSystem healthMonitorSystem;
+  //final DeviceHandler deviceHandler;
+  //final String userId;
 
   const LoginScreen({
     super.key,
     required this.onThemeChanged,
     required this.currentTheme,
-    required this.healthMonitorSystem,
-    required this.deviceHandler,
-    required this.userId,
+    required this.initializeDeviceHandlerFromLoginScreen,
+    //required this.healthMonitorSystem,
+    //required this.deviceHandler,
+    //required this.userId,
   });
 
   @override
@@ -32,6 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _emailError;
   String? _passwordError;
+
+  DeviceHandler? deviceHandler;
+  HealthMonitorSystem? healthMonitorSystem;
+  String userId = '';
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
@@ -51,15 +58,26 @@ class _LoginScreenState extends State<LoginScreen> {
     //final success = await authenticateUser(email, password);
     final success = await authenticateUser(email, password);
 
+    debugPrint("Success: $success");
+
     if (success) {
+      final list = await widget.initializeDeviceHandlerFromLoginScreen();
+
+      healthMonitorSystem = list[0] as HealthMonitorSystem;
+      deviceHandler = list[1] as DeviceHandler;
+      userId = list[2] as String;
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => MainScaffold(
             onThemeChanged: widget.onThemeChanged, // Pass the theme change callback
             currentTheme: widget.currentTheme,
-            healthMonitorSystem: widget.healthMonitorSystem,
-            deviceHandler: widget.deviceHandler,
-            userId: widget.userId,
+            healthMonitorSystem: healthMonitorSystem!,
+            deviceHandler: deviceHandler!,
+            userId: userId,
+            //healthMonitorSystem: widget.healthMonitorSystem,
+            //deviceHandler: widget.deviceHandler,
+            //userId: widget.userId,
           ),
         ),
       );

@@ -7,7 +7,8 @@ import 'package:zmartrest/screens/settings_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
 import 'package:zmartrest/screens/connect_device_screen.dart';
 import 'package:zmartrest/logic.dart';
-import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/simulated_device_handler.dart';
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
@@ -127,6 +128,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     healthMonitorSystem.rmssdStream.listen((data) {
       setState(() {
         _rmssdData.add(data.toJson());
+        debugPrint('RMSSD data from main scaffold: ${_rmssdData}');
       });
     });
 

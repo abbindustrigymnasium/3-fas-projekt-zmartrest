@@ -5,7 +5,8 @@ import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/screens/login_screen.dart';
 
-import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/device_handler.dart';
+import 'package:zmartrest/simulated_device_handler.dart';
 import 'package:zmartrest/logic.dart';
 
 void main() async {
@@ -49,13 +50,27 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _themeMode = widget.themeMode;
+    if (widget.isAuthenticated) {
+      _initializeDeviceHandler();
+    } else {
+      setState(() {
+        isLoading = false; // No need to wait for initialization if not authenticated
+      });
+    }
     _initializeDeviceHandler();
   }
 
   Future<void> _initializeDeviceHandler() async {
     try {
       final userInfo = await getUserInfo(); // Fetch user info
-      userId = userInfo?['id'];
+      if (userInfo == null) {
+        throw Exception("User info is null");
+      }
+      userId = userInfo['id'];
+      if (userId.isEmpty) {
+        throw Exception("User ID is empty");
+      }
+
 
       /*
       if (userId == null) {
@@ -69,7 +84,7 @@ class _AppState extends State<App> {
         healthMonitorSystem: healthMonitorSystem!,
       );
 
-      _addDeviceHandlerListeners();
+      //_addDeviceHandlerListeners();
     } catch (e) {
       debugPrint("Error initializing DeviceHandler: $e");
     } finally {
@@ -79,6 +94,43 @@ class _AppState extends State<App> {
     }
   }
 
+  Future initializeDeviceHandlerFromLoginScreen() async {
+    try {
+      final userInfo = await getUserInfo(); // Fetch user info
+      if (userInfo == null) {
+        throw Exception("User info is null");
+      }
+      userId = userInfo['id'];
+      if (userId.isEmpty) {
+        throw Exception("User ID is empty");
+      }
+
+
+      /*
+      if (userId == null) {
+        throw Exception("User ID is null");
+      }
+      */
+
+      healthMonitorSystem = HealthMonitorSystem(userId: userId); // Initialize HealthMonitorSystem
+      deviceHandler = DeviceHandler(
+        identifier: identifier,
+        healthMonitorSystem: healthMonitorSystem!,
+      );
+
+      //_addDeviceHandlerListeners();
+
+      return [healthMonitorSystem, deviceHandler, userId];
+    } catch (e) {
+      debugPrint("Error initializing DeviceHandler: $e");
+    } finally {
+      setState(() {
+        isLoading = false; // Initialization is complete
+      });
+    }
+  }
+
+  /*
   void _addDeviceHandlerListeners() {
     if (deviceHandler == null) return;
 
@@ -102,6 +154,7 @@ class _AppState extends State<App> {
       onError: (error) => setState(() => deviceHandler!.log('Disconnection error: $error')),
     );
   }
+  */
 
   void _setTheme(String theme) {
     setState(() {
@@ -114,11 +167,20 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
     }
 
-    if (healthMonitorSystem == null || deviceHandler == null) {
-      return const Center(child: Text("Initialization failed."));
+    // Only check for initialization failure if authenticated
+    if (widget.isAuthenticated && (healthMonitorSystem == null || deviceHandler == null)) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(child: Text("Initialization failed.")),
+        ),
+      );
     }
 
     return ShadApp(
@@ -151,9 +213,7 @@ class _AppState extends State<App> {
           : LoginScreen(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-              healthMonitorSystem: healthMonitorSystem!,
-              deviceHandler: deviceHandler!,
-              userId: userId,
+              initializeDeviceHandlerFromLoginScreen: initializeDeviceHandlerFromLoginScreen,
             ),
       )
     );
