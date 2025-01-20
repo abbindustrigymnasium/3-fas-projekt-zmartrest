@@ -1,16 +1,18 @@
-# zmartrest
+# Flutter application for Zmartrest
+This application allows the user to track and log activity and health related data measured by a Polar Verity Sense. The application is made with [Flutter](flutter.dev) and the code is written in [Dart](dart.dev). This application was made because of a request from [Zmartrest](zmartrest.ai).
 
-A new Flutter project.
+## Install
+Clone the repository.
+```bash
+git clone https://github.com/JakobGillarKebab/3-fas-projekt-zmartrest.git
+```
+Download the needed dependencies.
+```
+flutter pub get
+```
+## How to use
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Credits
+* Hannes Gingby
+* Alwin Forslund
+* Jakob Geffen
