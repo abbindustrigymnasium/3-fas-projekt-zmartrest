@@ -11,6 +11,7 @@ class LoginScreen extends StatefulWidget {
   final String currentTheme;
   final HealthMonitorSystem healthMonitorSystem;
   final DeviceHandler deviceHandler;
+  final String userId;
 
   const LoginScreen({
     super.key,
@@ -18,6 +19,7 @@ class LoginScreen extends StatefulWidget {
     required this.currentTheme,
     required this.healthMonitorSystem,
     required this.deviceHandler,
+    required this.userId,
   });
 
   @override
@@ -57,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
             currentTheme: widget.currentTheme,
             healthMonitorSystem: widget.healthMonitorSystem,
             deviceHandler: widget.deviceHandler,
+            userId: widget.userId,
           ),
         ),
       );

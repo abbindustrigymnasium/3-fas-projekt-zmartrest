@@ -17,6 +17,7 @@ class SettingsScreen extends StatelessWidget {
   final String currentTheme;
   final HealthMonitorSystem healthMonitorSystem;
   final DeviceHandler deviceHandler;
+  final String userId;
 
   const SettingsScreen({
     super.key,
@@ -24,6 +25,7 @@ class SettingsScreen extends StatelessWidget {
     required this.currentTheme,
     required this.healthMonitorSystem,
     required this.deviceHandler,
+    required this.userId,
   });
 
   Future<Map<String, dynamic>?> _getUserInfo() async {
@@ -243,6 +245,7 @@ class SettingsScreen extends StatelessWidget {
                                     currentTheme: currentTheme,
                                     healthMonitorSystem: healthMonitorSystem,
                                     deviceHandler: deviceHandler,
+                                    userId: userId,
                                   ),
                                 ),
                               );
@@ -254,7 +257,7 @@ class SettingsScreen extends StatelessWidget {
                             dialogTitle: 'Confirm deletion of all data',
                             dialogDescription: 'Are you absolutely sure you want to delete all data? This action cannot be undone.',
                             onConfirm: () {
-                              //deleteDataExceptFirst(pb, userId);
+                              deleteDataExceptFirst(pb, userId, 0);
                             },
                           ),
                         ],

@@ -12,6 +12,7 @@ import 'package:zmartrest/device_handler.dart';
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
   final String currentTheme;
+  final String userId;
 
   final HealthMonitorSystem healthMonitorSystem;
   final DeviceHandler deviceHandler;
@@ -22,6 +23,7 @@ class MainScaffold extends StatefulWidget {
     required this.currentTheme,
     required this.healthMonitorSystem,
     required this.deviceHandler,
+    required this.userId,
   });
 
   @override
@@ -151,6 +153,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         currentTheme: _currentTheme,
         healthMonitorSystem: widget.healthMonitorSystem,
         deviceHandler: widget.deviceHandler,
+        userId: widget.userId,
       ),
       AnalyzeScreen(
         onUserSelected: (user) {

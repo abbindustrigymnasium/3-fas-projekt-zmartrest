@@ -43,6 +43,8 @@ class _AppState extends State<App> {
   HealthMonitorSystem? healthMonitorSystem;
   bool isLoading = true;
 
+  String userId = '';
+
   @override
   void initState() {
     super.initState();
@@ -53,11 +55,13 @@ class _AppState extends State<App> {
   Future<void> _initializeDeviceHandler() async {
     try {
       final userInfo = await getUserInfo(); // Fetch user info
-      final userId = userInfo?['id'];
+      userId = userInfo?['id'];
 
+      /*
       if (userId == null) {
         throw Exception("User ID is null");
       }
+      */
 
       healthMonitorSystem = HealthMonitorSystem(userId: userId); // Initialize HealthMonitorSystem
       deviceHandler = DeviceHandler(
@@ -142,12 +146,14 @@ class _AppState extends State<App> {
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
               healthMonitorSystem: healthMonitorSystem!,
               deviceHandler: deviceHandler!,
+              userId: userId,
             )
           : LoginScreen(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
               healthMonitorSystem: healthMonitorSystem!,
               deviceHandler: deviceHandler!,
+              userId: userId,
             ),
       )
     );
