@@ -13,14 +13,18 @@ class SettingsScreen extends StatelessWidget {
   final Function(String) onThemeChanged;
   final String currentTheme;
   final String userId;
-  final Function initializeDeviceHandlerFromLoginScreen;
+  final Function getUserId;
+  final Function initializeDeviceHandler;
+  final Function initializeMonitorSystem;
 
   const SettingsScreen({
     super.key,
     required this.onThemeChanged,
     required this.currentTheme,
     required this.userId,
-    required this.initializeDeviceHandlerFromLoginScreen,
+    required this.getUserId,
+    required this.initializeDeviceHandler,
+    required this.initializeMonitorSystem,
   });
 
   Future<Map<String, dynamic>?> _getUserInfo() async {
@@ -98,7 +102,9 @@ class SettingsScreen extends StatelessWidget {
                                   builder: (context) => LoginScreen(
                                     onThemeChanged: onThemeChanged,
                                     currentTheme: currentTheme,
-                                    initializeDeviceHandlerFromLoginScreen: initializeDeviceHandlerFromLoginScreen,
+                                    getUserId: getUserId,
+                                    initializeDeviceHandler: initializeDeviceHandler,
+                                    initializeMonitorSystem: initializeMonitorSystem,
                                   ),
                                 ),
                               );

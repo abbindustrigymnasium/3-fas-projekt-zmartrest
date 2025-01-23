@@ -17,7 +17,10 @@ class MainScaffold extends StatefulWidget {
 
   final MonitorSystem monitorSystem;
   final DeviceHandler deviceHandler;
-  final Function initializeDeviceHandlerFromLoginScreen;
+  
+  final Function getUserId;
+  final Function initializeDeviceHandler;
+  final Function initializeMonitorSystem;
 
   const MainScaffold({
     super.key,
@@ -26,7 +29,9 @@ class MainScaffold extends StatefulWidget {
     required this.monitorSystem,
     required this.deviceHandler,
     required this.userId,
-    required this.initializeDeviceHandlerFromLoginScreen,
+    required this.getUserId,
+    required this.initializeDeviceHandler,
+    required this.initializeMonitorSystem,
   });
 
   @override
@@ -147,7 +152,9 @@ class _MainScaffoldState extends State<MainScaffold> {
         onThemeChanged: _updateTheme,
         currentTheme: _currentTheme,
         userId: widget.userId,
-        initializeDeviceHandlerFromLoginScreen: widget.initializeDeviceHandlerFromLoginScreen,
+        getUserId: widget.getUserId,
+        initializeDeviceHandler: widget.initializeDeviceHandler,
+        initializeMonitorSystem: widget.initializeMonitorSystem,
       ),
       AnalyzeScreen(
         onUserSelected: (user) {

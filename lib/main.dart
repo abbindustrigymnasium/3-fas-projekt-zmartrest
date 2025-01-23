@@ -50,39 +50,57 @@ class _AppState extends State<App> {
     super.initState();
     _themeMode = widget.themeMode;
     if (widget.isAuthenticated) {
-      _initializeDeviceHandler();
+      init();
     } else {
       setState(() {
         isLoading = false; // No need to wait for initialization if not authenticated
       });
     }
-    _initializeDeviceHandler();
   }
 
-  Future<void> _initializeDeviceHandler() async {
-    try {
-      final userInfo = await getUserInfo(); // Fetch user info
-      if (userInfo == null) {
-        throw Exception("User info is null");
-      }
-      userId = userInfo['id'];
-      if (userId.isEmpty) {
-        throw Exception("User ID is empty");
-      }
+  init() async {
+    monitorSystem = await _initializeMonitorSystem();
+    if (monitorSystem != null) {
+      deviceHandler = await _initializeDeviceHandler(monitorSystem!);
+    }
 
-      monitorSystem = MonitorSystem(userId: userId); // Initialize HealthMonitorSystem
+    setState(() {
+      isLoading = false; // Initialization is complete
+    });
+  }
+
+  Future _getUserId() async {
+    final userInfo = await getUserInfo(); // Fetch user info
+
+    userId = userInfo?['id'];
+    if (userId.isEmpty) {
+      throw Exception("User ID is empty");
+    } else {
+      return userId;
+    }
+  }
+
+  Future _initializeDeviceHandler(MonitorSystem monitorSystem) async {
+    try {      
       deviceHandler = DeviceHandler(
         identifier: identifier,
-        monitorSystem: monitorSystem!,
+        monitorSystem: monitorSystem,
       );
 
       _addDeviceHandlerListeners();
+
+      return deviceHandler;
     } catch (e) {
       debugPrint("Error initializing DeviceHandler: $e");
-    } finally {
-      setState(() {
-        isLoading = false; // Initialization is complete
-      });
+    }
+  }
+
+  Future _initializeMonitorSystem() async {
+    try {
+      final userId = await _getUserId();
+      return monitorSystem = MonitorSystem(userId: userId); // Initialize HealthMonitorSystem      
+    } catch (e) {
+      debugPrint("Error initializing monitor system: $e");
     }
   }
 
@@ -161,12 +179,16 @@ class _AppState extends State<App> {
               monitorSystem: monitorSystem!,
               deviceHandler: deviceHandler!,
               userId: userId,
-              initializeDeviceHandlerFromLoginScreen: _initializeDeviceHandler,
+              getUserId: _getUserId,
+              initializeDeviceHandler: _initializeDeviceHandler,
+              initializeMonitorSystem: _initializeMonitorSystem,
             )
           : LoginScreen(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-              initializeDeviceHandlerFromLoginScreen: _initializeDeviceHandler,
+              getUserId: _getUserId,
+              initializeDeviceHandler: _initializeDeviceHandler,
+              initializeMonitorSystem: _initializeMonitorSystem,
             ),
       )
     );

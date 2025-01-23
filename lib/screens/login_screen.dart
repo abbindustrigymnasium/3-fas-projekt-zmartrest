@@ -10,13 +10,17 @@ import 'package:zmartrest/logic.dart';
 class LoginScreen extends StatefulWidget {
   final Function(String) onThemeChanged; // Accept a callback for theme changes
   final String currentTheme;
-  final Function initializeDeviceHandlerFromLoginScreen;
+  final Function getUserId;
+  final Function initializeDeviceHandler;
+  final Function initializeMonitorSystem;
 
   const LoginScreen({
     super.key,
     required this.onThemeChanged,
     required this.currentTheme,
-    required this.initializeDeviceHandlerFromLoginScreen,
+    required this.getUserId,
+    required this.initializeDeviceHandler,
+    required this.initializeMonitorSystem,
   });
 
   @override
@@ -54,11 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
     debugPrint("Success: $success");
 
     if (success) {
-      final list = await widget.initializeDeviceHandlerFromLoginScreen();
-
-      monitorSystem = list[0] as MonitorSystem;
-      deviceHandler = list[1] as DeviceHandler;
-      userId = list[2] as String;
+      userId = await widget.getUserId();
+      monitorSystem = await widget.initializeMonitorSystem();
+      deviceHandler = await widget.initializeDeviceHandler(monitorSystem);
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -68,7 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
             monitorSystem: monitorSystem!,
             deviceHandler: deviceHandler!,
             userId: userId,
-            initializeDeviceHandlerFromLoginScreen: widget.initializeDeviceHandlerFromLoginScreen,
+            getUserId: widget.getUserId,
+            initializeDeviceHandler: widget.initializeDeviceHandler,
+            initializeMonitorSystem: widget.initializeMonitorSystem,
           ),
         ),
       );
