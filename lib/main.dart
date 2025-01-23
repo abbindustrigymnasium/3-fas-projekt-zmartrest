@@ -40,7 +40,7 @@ class _AppState extends State<App> {
   static const identifier = 'E985E828';
 
   DeviceHandler? deviceHandler;
-  HealthMonitorSystem? healthMonitorSystem;
+  MonitorSystem? monitorSystem;
   bool isLoading = true;
 
   String userId = '';
@@ -70,10 +70,10 @@ class _AppState extends State<App> {
         throw Exception("User ID is empty");
       }
 
-      healthMonitorSystem = HealthMonitorSystem(userId: userId); // Initialize HealthMonitorSystem
+      monitorSystem = MonitorSystem(userId: userId); // Initialize HealthMonitorSystem
       deviceHandler = DeviceHandler(
         identifier: identifier,
-        healthMonitorSystem: healthMonitorSystem!,
+        monitorSystem: monitorSystem!,
       );
 
       _addDeviceHandlerListeners();
@@ -129,7 +129,7 @@ class _AppState extends State<App> {
     }
 
     // Only check for initialization failure if authenticated
-    if (widget.isAuthenticated && (healthMonitorSystem == null || deviceHandler == null)) {
+    if (widget.isAuthenticated && (monitorSystem == null || deviceHandler == null)) {
       return MaterialApp(
         home: Scaffold(
           body: Center(child: Text("Initialization failed.")),
@@ -158,7 +158,7 @@ class _AppState extends State<App> {
           ? MainScaffold(
               onThemeChanged: _setTheme,
               currentTheme: _themeMode == ThemeMode.dark ? 'dark' : 'light',
-              healthMonitorSystem: healthMonitorSystem!,
+              monitorSystem: monitorSystem!,
               deviceHandler: deviceHandler!,
               userId: userId,
               initializeDeviceHandlerFromLoginScreen: _initializeDeviceHandler,

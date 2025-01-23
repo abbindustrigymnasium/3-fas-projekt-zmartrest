@@ -11,16 +11,16 @@ class DeviceHandler {
   final ValueNotifier<List<String>> logs = ValueNotifier<List<String>>([]);
   final ValueNotifier<bool> isConnected = ValueNotifier<bool>(false);
 
-  List<double> rrIntervals = [];
+  List<double> ppIntervals = [];
 
-  final HealthMonitorSystem healthMonitorSystem;
+  final MonitorSystem monitorSystem;
   Timer? _uploadTimer; // Timer for periodic pocketbase uploads
   final ValueNotifier<bool> isExercising = ValueNotifier<bool>(false);
   StreamSubscription? _motionStateSubscription;
 
   DeviceHandler({
     required this.identifier,
-    required this.healthMonitorSystem,
+    required this.monitorSystem,
   });
 
   // Method to connect the device
@@ -43,7 +43,7 @@ class DeviceHandler {
     _uploadTimer = Timer.periodic(const Duration(minutes: 10), (timer) async {
       log('Uploading buffered data to PocketBase...');
       try {
-        await healthMonitorSystem.flushBuffers();
+        await monitorSystem.flushBuffers();
         log('Data uploaded successfully.');
       } catch (e) {
         log('Error during data upload: $e');
@@ -64,42 +64,32 @@ class DeviceHandler {
             e.feature == PolarSdkFeature.onlineStreaming,
       );
 
+      // Get available data streams
       final availableTypes = await polar.getAvailableOnlineStreamDataTypes(identifier);
-      debugPrint('Available types: $availableTypes');
+      log('Available streams: $availableTypes');
 
       // Start streaming data
+      /*
       if (availableTypes.contains(PolarDataType.hr)) {
         polar.startHrStreaming(identifier).listen((data) {
           //log('Heart rate: ${data.samples.map((data) => data.hr)}');
           
           final hrSample = data.samples.first;
           log('Heart rate: ${hrSample.hr}');
-          healthMonitorSystem.processHeartRateData(hrSample.hr);
-
-          //log('Heart rate: ${hrSample.hr}');
-
-          // debugPrint('RR: ${hrSample.rrsMs}');
-
-          /*
-          // Extract RR intervals and calculate RMSSD
-          final rrIntervals = hrSample.rrsMs.map((e) => e.toDouble()).toList();
-          if (rrIntervals.isNotEmpty) {
-            final rmssd = healthMonitorSystem.calculateRmssd(rrIntervals);
-            healthMonitorSystem.processRmssdData(rmssd);
-          }
-          */
+          monitorSystem.processHeartRateData(hrSample.hr);
         });
       }
+      */
 
       if (availableTypes.contains(PolarDataType.acc)) {
         polar.startAccStreaming(identifier).listen((data) {
-          //log('Accelerometer data: ${data.samples}');
-
           final accSample = data.samples.first;
           final timeStamp = accSample.timeStamp;
 
+          log('Accelerometer data: x=${accSample.x}, y=${accSample.y}, z=${accSample.z}');
+
           // Pass data to logic
-          healthMonitorSystem.processAccelerometerData(
+          monitorSystem.processAccelerometerData(
             timeStamp.millisecondsSinceEpoch ~/ 1000,
             data.samples.first.x.toDouble(),
             data.samples.first.y.toDouble(),
@@ -110,22 +100,23 @@ class DeviceHandler {
 
       if (availableTypes.contains(PolarDataType.ppi)) {
         polar.startPpiStreaming(identifier).listen((data) {
-          //log('PPI data: ${data.samples}');
-
           final ppiSample = data.samples.first;
-
           log('PPI: ${ppiSample.ppi}');
 
-          //final rrIntervals = hrSample.rrsMs.map((e) => e.toDouble()).toList();
-          rrIntervals += [ppiSample.ppi.toDouble()];
-          if (rrIntervals.isNotEmpty) {
-            final rmssd = healthMonitorSystem.calculateRmssd(rrIntervals);
-            healthMonitorSystem.processRmssdData(rmssd, isExercising.value);
+          ppIntervals += [ppiSample.ppi.toDouble()];
+          if (ppIntervals.isNotEmpty) {
+            final rmssd = monitorSystem.calculateRmssd(ppIntervals);
+            monitorSystem.processRmssdData(rmssd, isExercising.value);
           }
+
+          // HR data from PPI instead, therefore we don't need a seperate HR stream
+          final hr = ppiSample.hr;
+          log('HR: $hr');
+          monitorSystem.processHeartRateData(hr);
         });
       }
 
-      _motionStateSubscription = healthMonitorSystem.motionStateStream.listen((state) {
+      _motionStateSubscription = monitorSystem.motionStateStream.listen((state) {
         isExercising.value = state == MotionState.exercising;
         log('Motion state: ${state.toString()}');
       });
@@ -146,7 +137,7 @@ class DeviceHandler {
 
       // Upload data on disconnect
       log('Uploading data on disconnect...');
-      await healthMonitorSystem.flushBuffers();
+      await monitorSystem.flushBuffers();
       log('Data uploaded successfully on disconnect.');
     } catch (e) {
       log('Error disconnecting: $e');

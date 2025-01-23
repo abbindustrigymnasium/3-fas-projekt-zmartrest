@@ -9,13 +9,13 @@ class DeviceHandler {
   final ValueNotifier<List<String>> logs = ValueNotifier<List<String>>([]);
   final ValueNotifier<bool> isConnected = ValueNotifier<bool>(false);
 
-  final HealthMonitorSystem healthMonitorSystem;
+  final MonitorSystem monitorSystem;
   Timer? _simulationTimer;
   final Random _random = Random();
 
   DeviceHandler({
     required this.identifier,
-    required this.healthMonitorSystem,
+    required this.monitorSystem,
   });
 
   Future<void> connect() async {
@@ -33,7 +33,7 @@ class DeviceHandler {
       // Simulate heart rate data
       final simulatedHr = _random.nextInt(40) + 60; // Random HR between 60-100
       log('Simulated Heart Rate: $simulatedHr');
-      healthMonitorSystem.processHeartRateData(simulatedHr);
+      monitorSystem.processHeartRateData(simulatedHr);
 
       // Simulate accelerometer data
       final simulatedAcc = AccelerometerReading(
@@ -43,7 +43,7 @@ class DeviceHandler {
         z: _random.nextDouble() * 2 - 1,
       );
       log('Simulated Accelerometer Data: x=${simulatedAcc.x}, y=${simulatedAcc.y}, z=${simulatedAcc.z}');
-      healthMonitorSystem.processAccelerometerData(
+      monitorSystem.processAccelerometerData(
         simulatedAcc.timestamp,
         simulatedAcc.x,
         simulatedAcc.y,
@@ -54,7 +54,7 @@ class DeviceHandler {
       final simulatedPpi = _random.nextInt(300) + 400; // Random PPI between 400-700 ms
       log('Simulated PPI: $simulatedPpi');
       final isExercising = false;
-      healthMonitorSystem.processRmssdData(simulatedPpi.toDouble(), isExercising);
+      monitorSystem.processRmssdData(simulatedPpi.toDouble(), isExercising);
     });
   }
 

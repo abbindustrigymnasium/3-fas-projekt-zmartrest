@@ -7,13 +7,13 @@ import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/logic.dart';
  
 class DeviceScreen extends StatefulWidget {
-  final HealthMonitorSystem healthMonitorSystem;
+  final MonitorSystem monitorSystem;
   final DeviceHandler deviceHandler;
 
   const DeviceScreen({
     super.key,
     required this.deviceHandler,
-    required this.healthMonitorSystem,
+    required this.monitorSystem,
   });
 
   @override

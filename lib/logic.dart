@@ -77,7 +77,7 @@ class RMSSDBaselineData {
   };
 }
 
-class HealthMonitorSystem {
+class MonitorSystem {
   final String userId;
   
   // Motion state monitoring
@@ -109,7 +109,7 @@ class HealthMonitorSystem {
   Stream<RMSSDData> get rmssdStream => _rmssdController.stream;
   Stream<RMSSDBaselineData> get baselineStream => _rmssdBaselineController.stream;
 
-  HealthMonitorSystem({required this.userId});
+  MonitorSystem({required this.userId});
 
   void processAccelerometerData(int timestamp, double x, double y, double z) {
     final reading = AccelerometerReading(
@@ -170,9 +170,10 @@ class HealthMonitorSystem {
   }
 
   void processRmssdData(double rmssd, bool isExercising) {
-    debugPrint('Processing RMSSD data: $rmssd, isExercising: $isExercising');
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
     final reading = RMSSDData(
-      timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      timestamp: timestamp,
       rmssd: rmssd,
       isExercising: isExercising,
     );
@@ -195,7 +196,7 @@ class HealthMonitorSystem {
     */
     
     
-    _updateBaselineRmssd(rmssd);
+    _updateBaselineRmssd(rmssd, timestamp);
     
     /*
     if (_motionStateController.hasListener) {
@@ -204,7 +205,7 @@ class HealthMonitorSystem {
     */
   }
 
-  void _updateBaselineRmssd(double rmssd) {
+  void _updateBaselineRmssd(double rmssd, int timestamp) {
     if (_rmssdBaseline == null) {
       _rmssdBaseline = rmssd;
     } else {
@@ -213,7 +214,7 @@ class HealthMonitorSystem {
     }
 
     final calculation = RMSSDBaselineData(
-      timestamp: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      timestamp: timestamp,
       rmssdBaseline: _rmssdBaseline,
     );
 

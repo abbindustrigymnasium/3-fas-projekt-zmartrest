@@ -15,7 +15,7 @@ class MainScaffold extends StatefulWidget {
   final String currentTheme;
   final String userId;
 
-  final HealthMonitorSystem healthMonitorSystem;
+  final MonitorSystem monitorSystem;
   final DeviceHandler deviceHandler;
   final Function initializeDeviceHandlerFromLoginScreen;
 
@@ -23,7 +23,7 @@ class MainScaffold extends StatefulWidget {
     super.key,
     required this.onThemeChanged,
     required this.currentTheme,
-    required this.healthMonitorSystem,
+    required this.monitorSystem,
     required this.deviceHandler,
     required this.userId,
     required this.initializeDeviceHandlerFromLoginScreen,
@@ -51,7 +51,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     _currentTheme = widget.currentTheme;  // Set initial theme
 
     _fetchLatestDate();
-    _listenToRealTimeData(widget.healthMonitorSystem);
+    _listenToRealTimeData(widget.monitorSystem);
   }
 
   Future<void> _fetchLatestDate() async {
@@ -95,7 +95,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         _accelerometerData = data['accelerometer'] ?? [];
         _heartRateData = data['heartrate'] ?? [];
         _rmssdData = data['rmssd'] ?? [];
-        _rmssdBaselineData = data['rmssd_baseline'];
+        _rmssdBaselineData = data['rmssd_baseline'] ?? [];
         _isLoading = false;
         _hasFetchedData = true;
       });
@@ -114,39 +114,30 @@ class _MainScaffoldState extends State<MainScaffold> {
     }
   }
 
-  void _listenToRealTimeData(HealthMonitorSystem healthMonitorSystem) {
-    healthMonitorSystem.heartRateStream.listen((data) {
+  void _listenToRealTimeData(MonitorSystem monitorSystem) {
+    monitorSystem.heartRateStream.listen((data) {
       setState(() {
         _heartRateData.add(data.toJson());
       });
     });
 
-    healthMonitorSystem.accelerometerStream.listen((data) {
+    monitorSystem.accelerometerStream.listen((data) {
       setState(() {
         _accelerometerData.add(data.toJson());
       });
     });
 
-    healthMonitorSystem.rmssdStream.listen((data) {
+    monitorSystem.rmssdStream.listen((data) {
       setState(() {
         _rmssdData.add(data.toJson());
-        debugPrint('RMSSD data from main scaffold: ${_rmssdData}');
       });
     });
 
-    healthMonitorSystem.baselineStream.listen((data) {
+    monitorSystem.baselineStream.listen((data) {
       setState(() {
         _rmssdBaselineData.add(data.toJson());
       });
     });
-
-    /*
-    healthMonitorSystem.baselineStream.listen((baseline) {
-      setState(() {
-        _rmssdBaselineData.add({'timestamp': DateTime.now().millisecondsSinceEpoch ~/ 1000, 'baseline': baseline});
-      });
-    });
-    */
   }
 
   @override
@@ -180,7 +171,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       ),
       DeviceScreen(
         deviceHandler: widget.deviceHandler,
-        healthMonitorSystem: widget.healthMonitorSystem,
+        monitorSystem: widget.monitorSystem,
       ),
     ];
 

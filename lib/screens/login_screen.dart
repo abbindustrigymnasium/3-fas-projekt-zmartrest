@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _passwordError;
 
   DeviceHandler? deviceHandler;
-  HealthMonitorSystem? healthMonitorSystem;
+  MonitorSystem? monitorSystem;
   String userId = '';
 
   Future<void> _handleLogin() async {
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       final list = await widget.initializeDeviceHandlerFromLoginScreen();
 
-      healthMonitorSystem = list[0] as HealthMonitorSystem;
+      monitorSystem = list[0] as MonitorSystem;
       deviceHandler = list[1] as DeviceHandler;
       userId = list[2] as String;
 
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (context) => MainScaffold(
             onThemeChanged: widget.onThemeChanged, // Pass the theme change callback
             currentTheme: widget.currentTheme,
-            healthMonitorSystem: healthMonitorSystem!,
+            monitorSystem: monitorSystem!,
             deviceHandler: deviceHandler!,
             userId: userId,
             initializeDeviceHandlerFromLoginScreen: widget.initializeDeviceHandlerFromLoginScreen,

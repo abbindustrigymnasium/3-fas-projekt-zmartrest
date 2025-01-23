@@ -390,9 +390,6 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                 DateTime.fromMillisecondsSinceEpoch(
                                   (data['timestamp'] * 1000).toInt()),
                             yValueMapper: (Map<String, dynamic>data, _) {
-                              //debugPrint('Max rmssd in chart: $maxRmssd');
-                              debugPrint('Data from within the chart is: ${data.toString()}');
-                              debugPrint(data['is_exercising'].toString());
                               return data['is_exercising'] ? maxRmssd : 0.0;
                             },
                             color: const Color.fromARGB(255, 255, 95, 149),
@@ -415,6 +412,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
                               yValueMapper: (data, _) {
+                                return (data['rmssd_baseline'] as num).toDouble();
+                                /*
                                 debugPrint("Baseline data in chart: ${data.toString()}");
                                 if (data['rmssd_baseline'] != null) {
                                   debugPrint("Baseline data in chart: ${data['rmssd_baseline'].toString()}");
@@ -424,6 +423,8 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   //return (data['rmssd'] as num).toDouble();
                                 }
                                 return 0.0;
+                                */
+
                               },
                               color: Colors.deepOrangeAccent,
                               enableTooltip: true,
