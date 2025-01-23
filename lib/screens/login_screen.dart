@@ -3,26 +3,20 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/pocketbase.dart';
-//import 'package:zmartrest/device_handler.dart';
-import 'package:zmartrest/simulated_device_handler.dart';
+import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/simulated_device_handler.dart';
 import 'package:zmartrest/logic.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(String) onThemeChanged; // Accept a callback for theme changes
   final String currentTheme;
   final Function initializeDeviceHandlerFromLoginScreen;
-  //final HealthMonitorSystem healthMonitorSystem;
-  //final DeviceHandler deviceHandler;
-  //final String userId;
 
   const LoginScreen({
     super.key,
     required this.onThemeChanged,
     required this.currentTheme,
     required this.initializeDeviceHandlerFromLoginScreen,
-    //required this.healthMonitorSystem,
-    //required this.deviceHandler,
-    //required this.userId,
   });
 
   @override
@@ -55,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    //final success = await authenticateUser(email, password);
     final success = await authenticateUser(email, password);
 
     debugPrint("Success: $success");
@@ -75,9 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             healthMonitorSystem: healthMonitorSystem!,
             deviceHandler: deviceHandler!,
             userId: userId,
-            //healthMonitorSystem: widget.healthMonitorSystem,
-            //deviceHandler: widget.deviceHandler,
-            //userId: widget.userId,
+            initializeDeviceHandlerFromLoginScreen: widget.initializeDeviceHandlerFromLoginScreen,
           ),
         ),
       );

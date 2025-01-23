@@ -193,23 +193,16 @@ class HealthMonitorSystem {
       _updateBaselineRmssd(rmssd);
     }
     */
-
     
+    
+    _updateBaselineRmssd(rmssd);
+    
+    /*
     if (_motionStateController.hasListener) {
       _updateBaselineRmssd(rmssd);
     }
-    
+    */
   }
-
-  /*
-  void _updateBaselineRmssd(double rmssd) {
-    _baselineWindow.add(rmssd);
-    if (_baselineWindow.length > 60) { // Keep last minute
-      _baselineWindow.removeAt(0);
-      _rmssdBaseline = _baselineWindow.reduce((a, b) => a + b) / _baselineWindow.length;
-    }
-  }
-  */
 
   void _updateBaselineRmssd(double rmssd) {
     if (_rmssdBaseline == null) {

@@ -7,8 +7,8 @@ import 'package:zmartrest/screens/settings_screen.dart';
 import 'package:zmartrest/widgets/bottom_nav.dart';
 import 'package:zmartrest/screens/connect_device_screen.dart';
 import 'package:zmartrest/logic.dart';
-//import 'package:zmartrest/device_handler.dart';
-import 'package:zmartrest/simulated_device_handler.dart';
+import 'package:zmartrest/device_handler.dart';
+//import 'package:zmartrest/simulated_device_handler.dart';
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
@@ -17,6 +17,7 @@ class MainScaffold extends StatefulWidget {
 
   final HealthMonitorSystem healthMonitorSystem;
   final DeviceHandler deviceHandler;
+  final Function initializeDeviceHandlerFromLoginScreen;
 
   const MainScaffold({
     super.key,
@@ -25,6 +26,7 @@ class MainScaffold extends StatefulWidget {
     required this.healthMonitorSystem,
     required this.deviceHandler,
     required this.userId,
+    required this.initializeDeviceHandlerFromLoginScreen,
   });
 
   @override
@@ -153,9 +155,8 @@ class _MainScaffoldState extends State<MainScaffold> {
       SettingsScreen(
         onThemeChanged: _updateTheme,
         currentTheme: _currentTheme,
-        healthMonitorSystem: widget.healthMonitorSystem,
-        deviceHandler: widget.deviceHandler,
         userId: widget.userId,
+        initializeDeviceHandlerFromLoginScreen: widget.initializeDeviceHandlerFromLoginScreen,
       ),
       AnalyzeScreen(
         onUserSelected: (user) {

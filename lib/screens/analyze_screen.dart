@@ -3,7 +3,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/widgets/select_user.dart';
 import 'package:zmartrest/pocketbase.dart';
-import 'data_visualization_screen.dart';
+import 'package:zmartrest/screens/data_visualization_screen.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onUserSelected;

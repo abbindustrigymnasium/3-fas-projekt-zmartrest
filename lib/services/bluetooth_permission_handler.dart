@@ -1,5 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
+// Requests bluetooth permissions from the device
+
 class BluetoothPermissionHandler {
   static Future<void> requestBluetoothPermissions() async {
     if (await Permission.bluetoothScan.isDenied) {

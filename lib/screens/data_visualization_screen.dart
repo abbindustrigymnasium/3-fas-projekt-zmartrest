@@ -36,7 +36,7 @@ class DataVisualizationScreen extends StatefulWidget {
 }
 
 double getMaxRmssd(List<dynamic> data) {
-  debugPrint('RMSSD data in data_visualization_screen: $data');
+  //debugPrint('RMSSD data in data_visualization_screen: $data');
 
   double maxValue = 0;
   for (var point in data) {
@@ -45,7 +45,7 @@ double getMaxRmssd(List<dynamic> data) {
       maxValue = rmssd;
     }
   }
-  debugPrint('Max rmssd: $maxValue');
+  //debugPrint('Max rmssd: $maxValue');
   return maxValue;
 }
 
@@ -414,8 +414,17 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                               xValueMapper: (Map<String, dynamic> data, _) =>
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
-                              yValueMapper: (data, _) =>
-                                  (data['rmssd_baseline'] as num).toDouble(),
+                              yValueMapper: (data, _) {
+                                debugPrint("Baseline data in chart: ${data.toString()}");
+                                if (data['rmssd_baseline'] != null) {
+                                  debugPrint("Baseline data in chart: ${data['rmssd_baseline'].toString()}");
+                                  return (data['rmssd_baseline'] as num).toDouble();
+                                } else if (data['rmssd'] != null) {
+                                  debugPrint("Baseline data in chart: ${data['rmssd'].toString()}");
+                                  //return (data['rmssd'] as num).toDouble();
+                                }
+                                return 0.0;
+                              },
                               color: Colors.deepOrangeAccent,
                               enableTooltip: true,
                               markerSettings: MarkerSettings(

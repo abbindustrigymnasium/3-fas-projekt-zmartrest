@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/foundation.dart';
+
 import 'package:zmartrest/logic.dart';
 
 class DeviceHandler {
@@ -71,20 +71,3 @@ class DeviceHandler {
     logs.value = [...logs.value, message];
   }
 }
-
-// Example usage
-/*
-void main() {
-  final healthMonitorSystem = HealthMonitorSystem(userId: 'test_user');
-  final simulatedDevice = DeviceHandler(
-    identifier: 'simulated_device_001',
-    healthMonitorSystem: healthMonitorSystem,
-  );
-
-  simulatedDevice.connect();
-
-  // To disconnect later
-  // simulatedDevice.disconnect();
-}
-
-*/
