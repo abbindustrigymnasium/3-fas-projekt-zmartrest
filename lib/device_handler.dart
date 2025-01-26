@@ -37,7 +37,7 @@ class DeviceHandler {
       isConnected.value = false;
     }
   }
-
+  //Periodic data upload
   void _startPeriodicUpload() {
     _uploadTimer?.cancel(); // Ensure any existing timer is canceled
     _uploadTimer = Timer.periodic(const Duration(minutes: 10), (timer) async {

@@ -6,6 +6,7 @@ import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/screens/login_screen.dart';
 import 'package:zmartrest/device_handler.dart';
 //import 'package:zmartrest/simulated_device_handler.dart';
+//if simulated data is needed
 import 'package:zmartrest/logic.dart';
 
 void main() async {

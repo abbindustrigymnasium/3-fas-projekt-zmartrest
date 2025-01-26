@@ -220,11 +220,7 @@ Future<List<Map<String, dynamic>>> fetchAccelerometerData(
     }).toList();
 
     debugPrint('Fetched accelerometer data within range');
-    /*
-    for (var data in dataList) {
-      debugPrint(data.toString());
-    }
-    */
+    
 
     return dataList;
   } catch (e) {
@@ -255,11 +251,7 @@ Future<List<Map<String, dynamic>>> fetchHeartrateData(
     }).toList();
 
     debugPrint('Fetched heart rate data within range');
-    /*
-    for (var data in dataList) {
-      debugPrint(data.toString());
-    }
-    */
+    
 
     return dataList;
   } catch (e) {
@@ -288,11 +280,7 @@ Future<List<Map<String, dynamic>>> fetchRmssdData(
     }).toList();
 
     debugPrint('Fetched rmssd data within range');
-    /*
-    for (var data in dataList) {
-      debugPrint(data.toString());
-    }
-    */
+    
 
     return dataList;
   } catch (e) {
@@ -320,11 +308,7 @@ Future<List<Map<String, dynamic>>> fetchRmssdBaselineData(
     }).toList();
 
     debugPrint('Fetched rmssd baseline data within range');
-    /*
-    for (var data in dataList) {
-      debugPrint(data.toString());
-    }
-    */
+    
 
     return dataList;
   } catch (e) {

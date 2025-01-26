@@ -9,6 +9,7 @@ import 'package:zmartrest/screens/connect_device_screen.dart';
 import 'package:zmartrest/logic.dart';
 import 'package:zmartrest/device_handler.dart';
 //import 'package:zmartrest/simulated_device_handler.dart';
+//if simulated data is needed
 
 class MainScaffold extends StatefulWidget {
   final Function(String) onThemeChanged; // Add the onThemeChanged callback
@@ -37,7 +38,7 @@ class MainScaffold extends StatefulWidget {
   @override
   _MainScaffoldState createState() => _MainScaffoldState();
 }
-
+//Manage states
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
   Map<String, dynamic>? _selectedUser;
@@ -118,7 +119,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       debugPrint(e.toString());
     }
   }
-
+//Establish listeners for realtime streams
   void _listenToRealTimeData(MonitorSystem monitorSystem) {
     monitorSystem.heartRateStream.listen((data) {
       setState(() {
@@ -144,7 +145,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       });
     });
   }
-
+//Build UI for main_scaffold
   @override
   Widget build(BuildContext context) {
     final List<Widget> baseScreens = [
