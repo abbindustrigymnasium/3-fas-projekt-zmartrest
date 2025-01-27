@@ -4,6 +4,7 @@ The **Zmartrest Analytics App** enables users to track and log activity and heal
 ## Table of Contents
 
 - [Features](#features)
+- [Initial Plan](#initial-plan)
 - [Screenshots](#screenshots)
 - [Install](#install)
 - [Testing](#testing)
@@ -15,6 +16,11 @@ The **Zmartrest Analytics App** enables users to track and log activity and heal
 - **Activity Logging:** Save session data for future analysis.
 - **User-Friendly Interface:** Simple and intuitive design, with customizable themes.
 - **Cross-Platform Support:** With Flutter, this app can be developed for multiple platforms, including Android, iOS, and Web.
+
+## Initial Plan
+
+(In swedish)
+![PLAN](./PLAN.png)
 
 ## Screenshots
 
