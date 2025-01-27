@@ -412,6 +412,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
                               yValueMapper: (data, _) {
+                                debugPrint("Baseline data in chart: ${data.toString()}");
                                 return (data['rmssd_baseline'] as num).toDouble();
                                 /*
                                 debugPrint("Baseline data in chart: ${data.toString()}");

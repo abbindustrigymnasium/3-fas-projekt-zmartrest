@@ -98,7 +98,7 @@ class MonitorSystem {
   final List<HeartRateReading> _heartRateBuffer = [];
   final List<RMSSDData> _rmssdBuffer = [];
   final List<RMSSDBaselineData> _rmssdBaselineBuffer = [];
-  //final int _bufferSize = 10; // Max buffer size
+  final int _bufferSize = 200; // Max buffer size
 
   double? _rmssdBaseline;
   //final _baselineWindow = <double>[];
@@ -130,11 +130,9 @@ class MonitorSystem {
       _activityBuffer.removeAt(0);
     }
     
-    /*
     if (_accelerometerBuffer.length >= _bufferSize) {
       _sendAccelerometerBuffer();
     }
-    */
   }
 
   void processHeartRateData(int hr) {
@@ -146,11 +144,9 @@ class MonitorSystem {
     _heartRateController.add(reading);
     _heartRateBuffer.add(reading);
     
-    /*
     if (_heartRateBuffer.length >= _bufferSize) {
       _sendHeartRateBuffer();
     }
-    */
   }
 
   // Reference: https://www.kubios.com/blog/hrv-analysis-methods/
@@ -182,11 +178,9 @@ class MonitorSystem {
     _rmssdController.add(reading);
     _rmssdBuffer.add(reading);
 
-    /*
     if (_rmssdBuffer.length >= _bufferSize) {
       _sendRmssdBuffer();
     }
-    */
 
     // Update baseline only during normal state
     /*
@@ -195,15 +189,8 @@ class MonitorSystem {
       _updateBaselineRmssd(rmssd);
     }
     */
-    
-    
+
     _updateBaselineRmssd(rmssd, timestamp);
-    
-    /*
-    if (_motionStateController.hasListener) {
-      _updateBaselineRmssd(rmssd);
-    }
-    */
   }
 
   void _updateBaselineRmssd(double rmssd, int timestamp) {
@@ -224,11 +211,9 @@ class MonitorSystem {
     _rmssdBaselineController.add(calculation);
     _rmssdBaselineBuffer.add(calculation);
 
-    /*
     if (_rmssdBaselineBuffer.length >= _bufferSize) {
       _sendRmssdBaselineBuffer();
     }
-    */
   }
 
   void _detectMotionState() {

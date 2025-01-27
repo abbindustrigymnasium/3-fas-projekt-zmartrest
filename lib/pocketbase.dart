@@ -191,10 +191,10 @@ Future<void> addRmssdBaselineData(
 
     final result =
         await pb.collection('rmssd_baseline_data').create(body: rmssdBaselineData);
-    debugPrint('RMSSD data added:');
+    debugPrint('RMSSD baseline data added:');
     debugPrint(result.toJson().toString());
   } catch (e) {
-    debugPrint('Error adding RMSSD data: $e');
+    debugPrint('Error adding RMSSD baseline data: $e');
   }
 }
 
@@ -302,7 +302,7 @@ Future<List<Map<String, dynamic>>> fetchRmssdBaselineData(
     List<Map<String, dynamic>> dataList = result.items.map((record) {
       return {
         'timestamp': record.data['timestamp'],
-        'rmssd': record.data['rmssd_baseline'],
+        'rmssd_baseline': record.data['rmssd_baseline'],
         'user': record.data['user'],
       };
     }).toList();
@@ -424,10 +424,10 @@ Future<void> deleteDataExceptFirst(PocketBase pb, String userId, int exceptFirst
     final rmssdData = await _fetchAllDataWithPagination(pb, 'rmssd_data', userId);
     final rmssdBaselineData = await _fetchAllDataWithPagination(pb, 'rmssd_baseline_data', userId);
 
-    debugPrint(accelerometerData.length.toString() + ' accelerometer records found');
-    debugPrint(heartrateData.length.toString() + ' heartrate records found');
-    debugPrint(rmssdData.length.toString() + ' rmssd records found');
-    debugPrint(rmssdBaselineData.length.toString() + ' rmssd baseline records found');
+    debugPrint('${accelerometerData.length.toString()} accelerometer records found');
+    debugPrint('${heartrateData.length.toString()} heartrate records found');
+    debugPrint('${rmssdData.length.toString()} rmssd records found');
+    debugPrint('${rmssdBaselineData.length.toString()} rmssd baseline records found');
 
     // Function to delete extra records in a collection
     Future<void> deleteExtraRecords(List<Map<String, dynamic>> data, String collectionName, int exceptFirst) async {
