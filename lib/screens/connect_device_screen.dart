@@ -3,7 +3,6 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:zmartrest/device_handler.dart';
 //import 'package:zmartrest/simulated_device_handler.dart';
-//For simulated data
 import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/logic.dart';
  

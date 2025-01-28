@@ -4,9 +4,8 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:zmartrest/pocketbase.dart';
 import 'package:zmartrest/main_scaffold.dart';
 import 'package:zmartrest/screens/login_screen.dart';
-import 'package:zmartrest/device_handler.dart';
-//import 'package:zmartrest/simulated_device_handler.dart';
-//if simulated data is needed
+//import 'package:zmartrest/simulated_device_handler.dart';   // Uncomment this line if simulated data is needed, do this for every file that uses the device_handler
+import 'package:zmartrest/device_handler.dart';              // Comment out the real one if so
 import 'package:zmartrest/logic.dart';
 
 void main() async {

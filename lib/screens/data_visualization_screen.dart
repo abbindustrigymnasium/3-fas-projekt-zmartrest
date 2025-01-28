@@ -412,20 +412,7 @@ class _DataVisualizationState extends State<DataVisualizationScreen> {
                                   DateTime.fromMillisecondsSinceEpoch(
                                     (data['timestamp'] * 1000).toInt()),
                               yValueMapper: (data, _) {
-                                debugPrint("Baseline data in chart: ${data.toString()}");
                                 return (data['rmssd_baseline'] as num).toDouble();
-                                /*
-                                debugPrint("Baseline data in chart: ${data.toString()}");
-                                if (data['rmssd_baseline'] != null) {
-                                  debugPrint("Baseline data in chart: ${data['rmssd_baseline'].toString()}");
-                                  return (data['rmssd_baseline'] as num).toDouble();
-                                } else if (data['rmssd'] != null) {
-                                  debugPrint("Baseline data in chart: ${data['rmssd'].toString()}");
-                                  //return (data['rmssd'] as num).toDouble();
-                                }
-                                return 0.0;
-                                */
-
                               },
                               color: Colors.deepOrangeAccent,
                               enableTooltip: true,
